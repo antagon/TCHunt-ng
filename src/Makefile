@@ -1,0 +1,30 @@
+CFLAGS = -std=gnu99 -O2 -pedantic -Wall -ggdb
+
+TARGET = tchuntng
+INSTALL_DIR = /usr/local/sbin
+
+.PHONY: clean install
+
+all: $(TARGET)
+
+install:
+	install --mode 755 $(TARGET) $(INSTALL_DIR)
+
+uninstall:
+	rm -f $(INSTALL_DIR)/$(TARGET)
+
+clean:
+	rm -f *.o $(TARGET)
+
+$(TARGET): main.o strolldir.o test_magic.o
+	$(CC) $(CFLAGS) $^ -o $(TARGET) -lmagic
+
+main.o: main.c
+	$(CC) $(CFLAGS) -c $<
+
+strolldir.o: strolldir.c
+	$(CC) $(CFLAGS) -c $<
+
+test_magic.o: test_magic.c
+	$(CC) $(CFLAGS) -c $<
+
