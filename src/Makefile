@@ -16,7 +16,7 @@ uninstall:
 clean:
 	rm -f *.o $(TARGET)
 
-$(TARGET): main.o strolldir.o test_magic.o
+$(TARGET): main.o strolldir.o test_magic.o test_chidist.o
 	$(CC) $(CFLAGS) $^ -o $(TARGET) -lmagic
 
 main.o: main.c
@@ -26,5 +26,8 @@ strolldir.o: strolldir.c
 	$(CC) $(CFLAGS) -c $<
 
 test_magic.o: test_magic.c
+	$(CC) $(CFLAGS) -c $<
+
+test_chidist.o: test_chidist.c
 	$(CC) $(CFLAGS) -c $<
 
