@@ -101,26 +101,24 @@ count_char (const char *buff, size_t buff_len, char needle)
 }
 #endif
 
-static int*
-map_char_counts (const char *buff, size_t buff_len, int array_cnt[256])
+static void
+map_char_counts (const char *buff, size_t buff_len, size_t array_cnt[256])
 {
 	size_t i;
 	unsigned char byte_val;
 
-	memset (array_cnt, 0, 256);
+	memset (array_cnt, 0, sizeof (size_t) * 256);
 
 	for ( i = 0; i < buff_len; i++ ){
 		byte_val = buff[i];
 
 		array_cnt[byte_val] += 1;
 	}
-
-	return array_cnt;
 }
 
 // -----------------------
 
-#define X2_SAMPLE_LEN (1024 * 32)
+#define X2_SAMPLE_LEN (1024 * 16)
 #define X2_POSSIBILITIES 256
 #define X2_FREQ_MIN 163.0
 #define X2_FREQ_MAX 373.0
@@ -134,7 +132,7 @@ testchidist_x2 (const char *file_path)
 	size_t buff_len;
 	double expected_freq;
 	double chi;
-	int char_map[X2_POSSIBILITIES];
+	size_t char_map[X2_POSSIBILITIES];
 	int i;
 
 	file = fopen (file_path, "rb");
@@ -177,8 +175,12 @@ testchidist_x2 (const char *file_path)
 
 	map_char_counts (buff, buff_len, char_map);
 
-	for ( i = 0; i < X2_POSSIBILITIES; i++ )
+	for ( i = 0; i < X2_POSSIBILITIES; i++ ){
+		if ( char_map[i] == 0 )
+			continue;
+
 		chi += pow (((char_map[i] * 1.0) - expected_freq), 2) / expected_freq;
+	}
 
 	if ( chi < X2_FREQ_MIN || chi > X2_FREQ_MAX ){
 #if 0
@@ -188,7 +190,7 @@ testchidist_x2 (const char *file_path)
 	}
 
 #if 0
-	fprintf (stderr, "\e[92m%s :: len: %zu, chi: %lf\e[0m\n", file_path, buff_len, chi);
+	fprintf (stdout, "\e[92m%s :: len: %zu, chi: %lf\e[0m\n", file_path, buff_len, chi);
 #endif
 
 	return 1;
