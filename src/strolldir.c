@@ -129,7 +129,10 @@ strolldir_scan (stroller_t *res)
 		if ( strcmp (".", dir_entry->d_name) == 0 || strcmp ("..", dir_entry->d_name) == 0 )
 			continue;
 
-		snprintf (fullpath, sizeof (fullpath), "%s/%s", dirname, dir_entry->d_name);
+		if ( dirname[strlen (dirname) - 1] == '/' )
+			snprintf (fullpath, sizeof (fullpath), "%s%s", dirname, dir_entry->d_name);
+		else
+			snprintf (fullpath, sizeof (fullpath), "%s/%s", dirname, dir_entry->d_name);
 
 		switch ( dir_entry->d_type ){
 			case DT_DIR:
