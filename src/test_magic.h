@@ -8,7 +8,7 @@ struct testmagic
 
 extern struct testmagic* testmagic_init (void);
 
-extern int testmagic_is_datafile (struct testmagic *testmagic, const char *file);
+extern int testmagic_test (struct testmagic *testmagic, const char *file);
 
 extern void testmagic_free (struct testmagic *testmagic);
 

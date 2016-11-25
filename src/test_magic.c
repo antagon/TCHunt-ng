@@ -6,7 +6,7 @@
 
 #include "test_magic.h"
 
-#define MAGIC_FLAGS (MAGIC_NO_CHECK_APPTYPE | MAGIC_SYMLINK /*| MAGIC_NO_CHECK_ASCII*/ | MAGIC_NO_CHECK_COMPRESS | MAGIC_NO_CHECK_ELF | MAGIC_NO_CHECK_FORTRAN /*| MAGIC_NO_CHECK_SOFT*/ | MAGIC_NO_CHECK_TAR | MAGIC_NO_CHECK_TOKENS | MAGIC_NO_CHECK_TROFF)
+#define MAGIC_FLAGS (MAGIC_NO_CHECK_APPTYPE | MAGIC_SYMLINK | MAGIC_NO_CHECK_COMPRESS | MAGIC_NO_CHECK_ELF | MAGIC_NO_CHECK_FORTRAN | MAGIC_NO_CHECK_TAR | MAGIC_NO_CHECK_TOKENS | MAGIC_NO_CHECK_TROFF)
 
 struct testmagic*
 testmagic_init (void)
@@ -20,19 +20,25 @@ testmagic_init (void)
 
 	new_test->magic_res = magic_open (MAGIC_FLAGS);
 
-	if ( new_test->magic_res == NULL )
+	if ( new_test->magic_res == NULL ){
+		free (new_test);
 		return NULL;
+	}
 
-	if ( magic_load (new_test->magic_res, NULL) == -1 )
+	if ( magic_load (new_test->magic_res, NULL) == -1 ){
+		free (new_test);
+		magic_close (new_test->magic_res);
 		return NULL;
+	}
 
 	return new_test;
 }
 
 int
-testmagic_is_datafile (struct testmagic *testmagic, const char *file)
+testmagic_test (struct testmagic *testmagic, const char *file)
 {
 	const char *ftype;
+	int match;
 
 	ftype = magic_file (testmagic->magic_res, file);
 
@@ -43,16 +49,26 @@ testmagic_is_datafile (struct testmagic *testmagic, const char *file)
 	fprintf (stderr, "%s : %s\n", file, ftype);
 #endif
 
-	if ( strcmp (ftype, "data") == 0 )
-		return 1;
+	match = 0;
 
-	return 0;
+	if ( strcmp (ftype, "data") == 0 )
+		match = 1;
+	else if ( strncmp (ftype, "PGP", 3) == 0 )
+		match = 2;
+	else if ( strncmp (ftype, "GPG", 3) == 0 )
+		match = 2;
+
+	return match;
 }
 
 void
 testmagic_free (struct testmagic *testmagic)
 {
+	if ( testmagic == NULL )
+		return;
 
+	magic_close (testmagic->magic_res);
+	free (testmagic);
 }
 
 const char*
