@@ -27,6 +27,16 @@ TCHunt-ng exits with one of the following exit codes:
 * `1` - a generic error occured.
 * `2` - no encrypted files were found.
 
+## Requirements
+
+* libmagic >= 5.0
+
+* glibc >= 2.0
+
+## Installation
+
+`make && sudo make install`
+
 ## Limitations
 
 Small files (less than 256 bytes) are not tested using *Chi-squared test*. Files which are actually encrypted will therefore remain undetected, unless detected by their file-type.
