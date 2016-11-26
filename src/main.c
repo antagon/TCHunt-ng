@@ -29,6 +29,8 @@ version_info (void)
 	fprintf (stdout, "TCHunt-ng %s\n", TCHUNTNG_VERSION);
 }
 
+#define EXIT_NOTFOUND 2
+
 static int
 scan_dir (const char *p, const char *dirname)
 {
@@ -36,10 +38,11 @@ scan_dir (const char *p, const char *dirname)
 	struct stroller_flist_path *path_iter;
 	const struct stroller_flist *files;
 	struct testmagic *testmagic;
-	int exitno;
+	int exitno, has_file;
 
 	exitno = EXIT_SUCCESS;
 	testmagic = NULL;
+	has_file = 0;
 
 	if ( strolldir_open (&dir, dirname) != 0 ){
 		fprintf (stderr, "%s: %s\n", p, strerror (errno));
@@ -73,8 +76,9 @@ scan_dir (const char *p, const char *dirname)
 
 			switch ( testmagic_test (testmagic, path_iter->path) ){
 				case -1:
-					fprintf (stderr, "%s: '%s': %s\n", p, path_iter->path, strerror (errno));
-					continue;
+					fprintf (stderr, "%s: '%s': %s\n", p, path_iter->path, testmagic_error (testmagic));
+					exitno = EXIT_FAILURE;
+					goto cleanup;
 
 				case 0:
 					// Read a next file...
@@ -91,7 +95,8 @@ scan_dir (const char *p, const char *dirname)
 			switch ( testchidist_x2 (path_iter->path) ){
 				case -1:
 					fprintf (stderr, "%s: '%s': %s\n", p, path_iter->path, strerror (errno));
-					continue;
+					exitno = EXIT_FAILURE;
+					goto cleanup;
 
 				case 0:
 					// Read a next file...
@@ -102,10 +107,14 @@ scan_dir (const char *p, const char *dirname)
 			}
 
 test_success:
+			has_file = 1;
 			fprintf (stdout, "%s\n", path_iter->path);
 		}
 
 	} while ( strolldir_nextdir (&dir) );
+
+	if ( ! has_file )
+		exitno = EXIT_NOTFOUND;
 
 cleanup:
 	strolldir_close (&dir);
@@ -131,10 +140,12 @@ scan_file (const char *p, const char *filename)
 
 	switch ( testmagic_test (testmagic, filename) ){
 		case -1:
-			fprintf (stderr, "%s: '%s': %s\n", p, filename, strerror (errno));
+			fprintf (stderr, "%s: '%s': %s\n", p, filename, testmagic_error (testmagic));
+			exitno = EXIT_FAILURE;
 			goto cleanup;
 
 		case 0:
+			exitno = EXIT_NOTFOUND;
 			goto cleanup;
 
 		case 1:
@@ -148,10 +159,11 @@ scan_file (const char *p, const char *filename)
 	switch ( testchidist_x2 (filename) ){
 		case -1:
 			fprintf (stderr, "%s: '%s': %s\n", p, filename, strerror (errno));
+			exitno = EXIT_FAILURE;
 			goto cleanup;
 
 		case 0:
-			// Read a next file...
+			exitno = EXIT_NOTFOUND;
 			goto cleanup;
 
 		case 1:
@@ -213,14 +225,12 @@ main (int argc, char *argv[])
 	}
 
 	if ( is_dir ){
-
-		if ( ! recursive ){
-			fprintf (stderr, "%s: ommitting directory '%s'\n", argv[0], argv[optind]);
+		if ( recursive ){
+			exitno = scan_dir (argv[0], argv[optind]);
+		} else {
+			fprintf (stderr, "%s: omitting directory '%s'\n", argv[0], argv[optind]);
 			exitno = EXIT_FAILURE;
-			return exitno;
 		}
-
-		exitno = scan_dir (argv[0], argv[optind]);
 	} else {
 		exitno = scan_file (argv[0], argv[optind]);
 	}
