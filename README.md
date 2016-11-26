@@ -9,7 +9,7 @@ TCHunt-ng is a free software licensed under **GPLv3**.
 TCHunt-ng performs following tests against content of a file to determine if it is encrypted:
 
 1. Test against a database of well known file-types provided by *libmagic*.
-2. *Chi-squared* test.
+2. *Chi-squared test*.
 
 ## Usage
 
@@ -29,7 +29,7 @@ TCHunt-ng exits with one of the following exit codes:
 
 ## Limitations
 
-Small files (less than 256 bytes) are not tested in *Chi-squared distribution* test, therefore some files that are actually encrypted will be unreported.
+Small files (less than 256 bytes) are not tested using *Chi-squared test*. Files which are actually encrypted will therefore remain undetected, unless detected by their file-type.
 
 ## References
 
