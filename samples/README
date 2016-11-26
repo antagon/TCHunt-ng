@@ -1,0 +1,7 @@
+0x93326F63-pub.asc -- PGP Public Key
+0x93326F63-sec.asc -- PGP Private Key
+message.txt -- Original text
+message.txt.asc -- PGP encrypted message (Armored)
+message.txt.dat -- AES encrypted message
+message.txt.gpg -- PGP encrypted message (Raw)
+naganaga.vc -- VeraCrypt container
