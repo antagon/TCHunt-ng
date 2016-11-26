@@ -1,3 +1,20 @@
+/*
+ * TCHunt-ng - reveal (possibly) encrypted files stored on a filesystem.
+ * Copyright (C) 2016, 2017  CodeWard.org
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -18,8 +35,6 @@ map_char_counts (const char *buff, size_t buff_len, size_t array_cnt[256])
 		array_cnt[byte_val] += 1;
 	}
 }
-
-// -----------------------
 
 #define X2_SAMPLE_LEN (1024 * 13)
 #define X2_POSSIBILITIES 256
