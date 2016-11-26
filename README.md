@@ -1,6 +1,6 @@
 # TCHunt-ng
 
-TCHunt-ng attempts to reveal encrypted files stored on a filesystem. The program is successful in revealing **TrueCrypt/VeraCrypt** containers, **EncFS** encrypted files, **PGP/GPG** messages (and keys) and most likely other files. The code is based on ideas laid out in the project of *Stephen Judge* named *TCHunt*, hence the name. The original code has aged badly, having unnecessary dependencies and unfixed bugs; a rewrite that would allow easier portability seemed like a good idea.
+TCHunt-ng attempts to reveal encrypted files stored on a filesystem. The program is successful in finding **TrueCrypt/VeraCrypt** containers, **EncFS** encrypted files, **PGP/GPG** messages (and keys), and other files made up of random data. The code is based on ideas laid out in the project of *Stephen Judge* named *TCHunt*, hence the name. The original code has aged badly, having unnecessary dependencies and unfixed bugs; a rewrite seemed like a good idea.
 
 TCHunt-ng is a free software licensed under **GPLv3**.
 
