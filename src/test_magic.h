@@ -23,7 +23,7 @@ struct testmagic
 	magic_t magic_res;
 };
 
-extern struct testmagic* testmagic_init (void);
+extern int testmagic_init (struct testmagic *testmagic);
 
 extern int testmagic_test (struct testmagic *testmagic, const char *file);
 

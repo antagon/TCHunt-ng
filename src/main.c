@@ -54,11 +54,10 @@ scan_dir (const char *p, const char *dirname)
 	stroller_t dir;
 	struct stroller_flist_path *path_iter;
 	const struct stroller_flist *files;
-	struct testmagic *testmagic;
+	struct testmagic testmagic;
 	int exitno, has_file;
 
 	exitno = EXIT_SUCCESS;
-	testmagic = NULL;
 	has_file = 0;
 
 	if ( strolldir_open (&dir, dirname) != 0 ){
@@ -67,10 +66,8 @@ scan_dir (const char *p, const char *dirname)
 		goto cleanup;
 	}
 
-	testmagic = testmagic_init ();
-
-	if ( testmagic == NULL ){
-		fprintf (stderr, "%s: %s\n", p, testmagic_error (testmagic));
+	if ( testmagic_init (&testmagic) == -1 ){
+		fprintf (stderr, "%s: %s\n", p, testmagic_error (&testmagic));
 		exitno = EXIT_FAILURE;
 		goto cleanup;
 	}
@@ -91,9 +88,9 @@ scan_dir (const char *p, const char *dirname)
 
 		for ( path_iter = files->head; path_iter != NULL; path_iter = path_iter->next ){
 
-			switch ( testmagic_test (testmagic, path_iter->path) ){
+			switch ( testmagic_test (&testmagic, path_iter->path) ){
 				case -1:
-					fprintf (stderr, "%s: '%s': %s\n", p, path_iter->path, testmagic_error (testmagic));
+					fprintf (stderr, "%s: '%s': %s\n", p, path_iter->path, testmagic_error (&testmagic));
 					exitno = EXIT_FAILURE;
 					goto cleanup;
 
@@ -135,7 +132,7 @@ test_success:
 
 cleanup:
 	strolldir_close (&dir);
-	testmagic_free (testmagic);
+	testmagic_free (&testmagic);
 
 	return exitno;
 }
@@ -143,21 +140,20 @@ cleanup:
 static int
 scan_file (const char *p, const char *filename)
 {
-	struct testmagic *testmagic;
+	struct testmagic testmagic;
 	int exitno;
 
 	exitno = EXIT_SUCCESS;
-	testmagic = testmagic_init ();
 
-	if ( testmagic == NULL ){
-		fprintf (stderr, "%s: %s\n", p, testmagic_error (testmagic));
+	if ( testmagic_init (&testmagic) == -1 ){
+		fprintf (stderr, "%s: %s\n", p, testmagic_error (&testmagic));
 		exitno = EXIT_FAILURE;
 		goto cleanup;
 	}
 
-	switch ( testmagic_test (testmagic, filename) ){
+	switch ( testmagic_test (&testmagic, filename) ){
 		case -1:
-			fprintf (stderr, "%s: '%s': %s\n", p, filename, testmagic_error (testmagic));
+			fprintf (stderr, "%s: '%s': %s\n", p, filename, testmagic_error (&testmagic));
 			exitno = EXIT_FAILURE;
 			goto cleanup;
 
@@ -191,7 +187,7 @@ test_success:
 	fprintf (stdout, "%s\n", filename);
 
 cleanup:
-	testmagic_free (testmagic);
+	testmagic_free (&testmagic);
 	
 	return exitno;
 }

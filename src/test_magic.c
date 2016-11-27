@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #if 0
-#include <stdio.h> // FIXME
+#include <stdio.h>
 #endif
 #include <stdlib.h>
 #include <string.h>
@@ -27,30 +27,18 @@
 
 #define MAGIC_FLAGS (MAGIC_NO_CHECK_APPTYPE | MAGIC_SYMLINK | MAGIC_NO_CHECK_COMPRESS | MAGIC_NO_CHECK_ELF | MAGIC_NO_CHECK_FORTRAN | MAGIC_NO_CHECK_TAR | MAGIC_NO_CHECK_TOKENS | MAGIC_NO_CHECK_TROFF)
 
-struct testmagic*
-testmagic_init (void)
+int
+testmagic_init (struct testmagic *testmagic)
 {
-	struct testmagic *new_test;
+	testmagic->magic_res = magic_open (MAGIC_FLAGS);
 
-	new_test = calloc (1, sizeof (struct testmagic));
+	if ( testmagic->magic_res == NULL )
+		return -1;
 
-	if ( new_test == NULL )
-		return NULL;
+	if ( magic_load (testmagic->magic_res, NULL) == -1 )
+		return -1;
 
-	new_test->magic_res = magic_open (MAGIC_FLAGS);
-
-	if ( new_test->magic_res == NULL ){
-		free (new_test);
-		return NULL;
-	}
-
-	if ( magic_load (new_test->magic_res, NULL) == -1 ){
-		free (new_test);
-		magic_close (new_test->magic_res);
-		return NULL;
-	}
-
-	return new_test;
+	return 0;
 }
 
 int
@@ -86,15 +74,20 @@ testmagic_free (struct testmagic *testmagic)
 	if ( testmagic == NULL )
 		return;
 
+	if ( testmagic->magic_res == NULL )
+		return;
+
 	magic_close (testmagic->magic_res);
-	free (testmagic);
 }
 
 const char*
 testmagic_error (struct testmagic *testmagic)
 {
-	if ( errno != 0 )
-		return strerror (errno);
+	if ( testmagic == NULL )
+		return NULL;
+
+	if ( testmagic->magic_res == NULL )
+		return NULL;
 
 	return magic_error (testmagic->magic_res);
 }
