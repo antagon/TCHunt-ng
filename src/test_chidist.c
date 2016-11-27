@@ -81,14 +81,7 @@ testchidist_x2 (const char *file_path)
 
 	fclose (file);
 
-	if ( buff_len < X2_POSSIBILITIES ){
-#if 0
-		fprintf (stderr, "\e[31m%s :: too small %zu\e[0m\n", file_path, file_len);
-#endif
-		return 0;
-	}
-
-	expected_freq = buff_len / X2_POSSIBILITIES;
+	expected_freq = (buff_len * 1.0) / (X2_POSSIBILITIES * 1.0);
 	chi = 0.0;
 
 	map_char_counts (buff, buff_len, char_map);
