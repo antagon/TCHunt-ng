@@ -45,5 +45,7 @@ Small files (< 13kB) are harder to pick up on. False positives are rare, yet the
 
 https://github.com/stephenjudge/TCHunt
 
+https://github.com/file/file
+
 https://en.wikipedia.org/wiki/Chi-squared_test
 
