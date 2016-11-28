@@ -160,7 +160,6 @@ strolldir_scan (stroller_t *res)
 				break;
 
 			case DT_REG:
-			case DT_LNK:
 #if 0
 				fprintf (stderr, "found file: %s\n", fullpath);
 #endif
