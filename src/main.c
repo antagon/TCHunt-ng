@@ -29,7 +29,7 @@
 #include "test_magic.h"
 #include "test_chidist.h"
 
-#define TCHUNTNG_VERSION "1.0"
+#define TCHUNTNG_VERSION "1.1"
 
 static void
 usage (const char *p)
