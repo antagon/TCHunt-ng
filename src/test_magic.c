@@ -41,6 +41,8 @@ testmagic_init (struct testmagic *testmagic)
 	return 0;
 }
 
+#define MATCHES(str, predicate) (strncmp ((str), (predicate), strlen ((predicate))) == 0)
+
 int
 testmagic_test (struct testmagic *testmagic, const char *file)
 {
@@ -49,8 +51,11 @@ testmagic_test (struct testmagic *testmagic, const char *file)
 
 	ftype = magic_file (testmagic->magic_res, file);
 
-	if ( ftype == NULL )
+	if ( ftype == NULL ){
+		if ( errno == ENODATA )
+			return 0;
 		return -1;
+	}
 
 #if 0
 	fprintf (stderr, "%s : %s\n", file, ftype);
@@ -60,9 +65,23 @@ testmagic_test (struct testmagic *testmagic, const char *file)
 
 	if ( strcmp (ftype, "data") == 0 )
 		match = 1;
-	else if ( strncmp (ftype, "PGP", 3) == 0 )
+	else if ( MATCHES (ftype, "PGP") )
 		match = 2;
-	else if ( strncmp (ftype, "GPG", 3) == 0 )
+	else if ( MATCHES (ftype, "GPG") )
+		match = 2;
+	else if ( MATCHES (ftype, "OpenSSH") )
+		match = 2;
+	else if ( MATCHES (ftype, "PEM RSA private key") )
+		match = 2;
+	else if ( MATCHES (ftype, "PEM DSA private key") )
+		match = 2;
+	else if ( MATCHES (ftype, "PEM EC private key") )
+		match = 2;
+	else if ( MATCHES (ftype, "Keepass password database") )
+		match = 2;
+	else if ( MATCHES (ftype, "Password Safe V3 database") )
+		match = 2;
+	else if ( MATCHES (ftype, "cvs password text file") )
 		match = 2;
 
 	return match;
