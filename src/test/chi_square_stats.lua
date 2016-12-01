@@ -26,12 +26,6 @@ function chi_square (buff)
 	return chi
 end
 
-local chi_stats = {
-	min = nil,
-	max = nil,
-	init = false
-}
-
 function update_chi_stats (stats, num)
 	if not stats.init then
 		stats.min = num
@@ -54,14 +48,23 @@ end
 ----------------------------
 ----------------------------
 ----------------------------
+local chunks = {
+	{ len = math.pow (2, 5), stats = { min = nil, max = nil, init = false }},
+	{ len = math.pow (2, 6), stats = { min = nil, max = nil, init = false }},
+	{ len = math.pow (2, 7), stats = { min = nil, max = nil, init = false }},
+	{ len = math.pow (2, 8), stats = { min = nil, max = nil, init = false }},
+	{ len = math.pow (2, 9), stats = { min = nil, max = nil, init = false }},
+	{ len = math.pow (2, 10), stats = { min = nil, max = nil, init = false }},
+	{ len = math.pow (2, 11), stats = { min = nil, max = nil, init = false }},
+	{ len = math.pow (2, 12), stats = { min = nil, max = nil, init = false }},
+	{ len = math.pow (2, 13), stats = { min = nil, max = nil, init = false }},
+	{ len = math.pow (2, 14), stats = { min = nil, max = nil, init = false }},
+	{ len = math.pow (2, 15), stats = { min = nil, max = nil, init = false }}
+}
+local rnd_source = "/dev/urandom"
+local poolsize_b = math.pow (1024, 3) * 100
+local read_b = math.pow (2, 24)
 
-if #arg < 1 then
-	print (("Usage: %s <size>"):format (arg[0]))
-	os.exit (1)
-end
-
-local rnd_source = "/dev/random"
-local read_b = tonumber (arg[1])
 local fd = io.open (rnd_source, "r")
 
 if not fd then
@@ -69,9 +72,9 @@ if not fd then
 	os.exit (1)
 end
 
-local loop_cnt = 0
+for i = 0, (poolsize_b / read_b) do
+	print (("%s %d/%d"):format (os.date (), i, (poolsize_b / read_b)))
 
-while true do
 	local data = fd:read (read_b)
 
 	if not data or #data < read_b then
@@ -79,14 +82,15 @@ while true do
 		break
 	end
 
-	update_chi_stats (chi_stats, chi_square (data))
-
-	if loop_cnt == 1000 then
-		print (("(%f;%f)"):format (chi_stats.min, chi_stats.max))
-		loop_cnt = 0
+	for _, chunk in ipairs (chunks) do
+		for i = 1, read_b, chunk.len do
+			update_chi_stats (chunk.stats, chi_square (data:sub (i, i + chunk.len - 1)))
+		end
 	end
+end
 
-	loop_cnt = loop_cnt + 1
+for _, chunk in ipairs (chunks) do
+	print (("%d Bytes - (%f;%f)"):format (chunk.len, chunk.stats.min, chunk.stats.max))
 end
 
 io.close (fd)
