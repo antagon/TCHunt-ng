@@ -17,12 +17,13 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <errno.h>
 #include <math.h>
 #include <string.h>
 
 static void
-map_char_counts (const char *buff, size_t buff_len, size_t array_cnt[256])
+map_char_counts (const unsigned char *buff, size_t buff_len, size_t array_cnt[256])
 {
 	size_t i;
 	unsigned char byte_val;
@@ -36,21 +37,98 @@ map_char_counts (const char *buff, size_t buff_len, size_t array_cnt[256])
 	}
 }
 
-#define X2_SAMPLE_LEN (1024 * 13)
-#define X2_POSSIBILITIES 256
-#define X2_FREQ_MIN 163.0
-#define X2_FREQ_MAX 373.0
+#define CHDMODEL_MINLEN 32
+#define CHDMODEL_MAXLEN 16384
+
+// NOTICE: If you change the value of CHDMODEL_???LEN, change also the values
+// below.  These contants are here so we do not have to calculate log2 of
+// CHDMODEL_???LEN on runtime.
+#define CHDMODEL_MINEXP 5
+#define CHDMODEL_MAXEXP 14
+
+struct chidist_freqmodel
+{
+	size_t m_len;
+	double m_min;
+	double m_max;
+};
+
+static struct chidist_freqmodel chidist_model[] = {
+	{ 32, 196.000000, 522.955577 },
+	{ 64, 144.000000, 431.435123 },
+	{ 128, 93.751789, 358.994628 },
+	{ 256, 85.544212, 302.946516 },
+	{ 512, 113.581128, 318.210070 },
+	{ 1024, 145.006545, 371.587999 },
+	{ 2048, 159.525671, 380.323209 },
+	{ 4096, 160.736719, 382.075125 },
+	{ 8192, 166.253709, 372.904270 },
+	{ 16384, 164.056730, 368.707758 }
+};
+
+static inline double
+derive_closest (double num)
+{
+	double res;
+
+	res = pow (2, round (log2 (num)));
+
+	if ( res < CHDMODEL_MINLEN || res > CHDMODEL_MAXLEN )
+		return -1.0;
+
+	return res;
+}
+
+static inline double
+derive_cindex (double model_len)
+{
+	double res;
+
+	res = log2 (model_len);
+
+	if ( res < CHDMODEL_MINEXP || res > CHDMODEL_MAXEXP )
+		return -1.0;
+
+	return res - CHDMODEL_MINEXP;
+}
+
+static struct chidist_freqmodel*
+chidist_freqmodel_lookup_closest (size_t data_len)
+{
+	double model_len;
+	size_t model_idx;
+
+	model_len = derive_closest ((double) (data_len * 1.0));
+
+	if ( model_len == -1 ){
+		errno = EINVAL;
+		return NULL;
+	}
+
+	model_idx = (size_t) derive_cindex (model_len);
+
+	if ( model_idx == -1 ){
+		errno = EINVAL;
+		return NULL;
+	}
+
+	return &(chidist_model[model_idx]);
+}
+
+#define X2_SAMPLE_LEN 16384
+#define X2_POSSIBILITIES UCHAR_MAX
 
 int
 testchidist_x2 (const char *file_path)
 {
 	FILE *file;
 	size_t file_len;
-	char buff[X2_SAMPLE_LEN];
+	unsigned char buff[X2_SAMPLE_LEN];
+	size_t char_map[X2_POSSIBILITIES];
+	const struct chidist_freqmodel *model;
 	size_t buff_len;
 	double expected_freq;
 	double chi;
-	size_t char_map[X2_POSSIBILITIES];
 	int i;
 
 	file = fopen (file_path, "rb");
@@ -93,7 +171,17 @@ testchidist_x2 (const char *file_path)
 		chi += pow (((char_map[i] * 1.0) - expected_freq), 2) / expected_freq;
 	}
 
-	if ( chi < X2_FREQ_MIN || chi > X2_FREQ_MAX ){
+	model = chidist_freqmodel_lookup_closest (buff_len);
+
+	if ( model == NULL ){
+#if 0
+		// FIXME: do not print anything!
+		fprintf (stderr, "\e[31m%s :: len: %zu, chi: %lf: cannot obtain closest model\e[0m\n", file_path, buff_len, chi);
+#endif
+		return 0;
+	}
+
+	if ( chi < model->m_min || chi > model->m_max ){
 #if 0
 		fprintf (stderr, "\e[31m%s :: len: %zu, chi: %lf\e[0m\n", file_path, buff_len, chi);
 #endif
