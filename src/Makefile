@@ -17,7 +17,7 @@ clean:
 	rm -f *.o $(TARGET)
 
 $(TARGET): main.o strolldir.o test_magic.o test_chidist.o
-	$(CC) $(CFLAGS) $^ -o $(TARGET) -lmagic
+	$(CC) $(CFLAGS) $^ -o $(TARGET) -lmagic -lm
 
 main.o: main.c
 	$(CC) $(CFLAGS) -c $<
