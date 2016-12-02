@@ -9,6 +9,10 @@ password text file.
 
 * Do not treat ENODATA as an error, ignore the file instead.
 
+* Recognize smaller files. The solution for this problem is based on model
+data computed from a pool of random data for individual lengths of power of 2
+(2^5, 2^6,...).
+
 version 1.0 - 2016-11-27
 ------------------------
 
