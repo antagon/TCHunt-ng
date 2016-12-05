@@ -58,8 +58,7 @@ local chunks = {
 	{ len = math.pow (2, 11), stats = { min = nil, max = nil, init = false }},
 	{ len = math.pow (2, 12), stats = { min = nil, max = nil, init = false }},
 	{ len = math.pow (2, 13), stats = { min = nil, max = nil, init = false }},
-	{ len = math.pow (2, 14), stats = { min = nil, max = nil, init = false }},
-	{ len = math.pow (2, 15), stats = { min = nil, max = nil, init = false }}
+	{ len = math.pow (2, 14), stats = { min = nil, max = nil, init = false }}
 }
 local rnd_source = "/dev/urandom"
 local poolsize_b = math.pow (1024, 3) * 100
@@ -86,11 +85,15 @@ for i = 0, (poolsize_b / read_b) do
 		for i = 1, read_b, chunk.len do
 			update_chi_stats (chunk.stats, chi_square (data:sub (i, i + chunk.len - 1)))
 		end
+
+		print (("{ %d, %f, %f },"):format (chunk.len, chunk.stats.min, chunk.stats.max))
 	end
 end
 
+print ("DONE!")
+
 for _, chunk in ipairs (chunks) do
-	print (("%d Bytes - (%f;%f)"):format (chunk.len, chunk.stats.min, chunk.stats.max))
+	print (("{ %d, %f, %f },"):format (chunk.len, chunk.stats.min, chunk.stats.max))
 end
 
 io.close (fd)
