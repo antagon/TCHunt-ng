@@ -24,79 +24,6 @@
 
 #include "strolldir.h"
 
-static void
-stroller_flist_init (struct stroller_flist *list)
-{
-	list->head = NULL;
-	list->tail = NULL;
-}
-
-static int
-stroller_flist_add (struct stroller_flist *list, const char *path)
-{
-	struct stroller_flist_path *new_path;
-
-	new_path = malloc (sizeof (struct stroller_flist_path));
-
-	if ( new_path == NULL )
-		return 1;
-
-	new_path->next = NULL;
-	new_path->path = strdup (path);
-
-	if ( new_path->path == NULL )
-		return 1;
-
-	if ( list->head == NULL ){
-		list->head = new_path;
-		list->tail = list->head;
-	} else {
-		list->tail->next = new_path;
-		list->tail = new_path;
-	}
-
-	return 0;
-}
-
-static void
-stroller_flist_delete (struct stroller_flist *list)
-{
-	struct stroller_flist_path *next_path;
-
-	if ( list->head == NULL )
-		return;
-
-	next_path = list->head->next;
-
-	if ( list->head == list->tail )
-		list->tail = next_path;
-
-	if ( list->head->path != NULL )
-		free (list->head->path);
-
-	free (list->head);
-
-	list->head = next_path;
-}
-
-static void
-stroller_flist_free (struct stroller_flist *list)
-{
-	struct stroller_flist_path *path_iter, *path_iter_next;
-
-	path_iter = list->head;
-
-	while ( path_iter != NULL ){
-		path_iter_next = path_iter->next;
-
-		if ( path_iter->path != NULL )
-			free (path_iter->path);
-
-		free (path_iter);
-		path_iter = path_iter_next;
-	}
-}
-
 const char*
 strolldir_getdir (stroller_t *res)
 {
@@ -111,10 +38,10 @@ strolldir_open (stroller_t *res, const char *dir)
 {
 	memset (res, 0, sizeof (stroller_t));
 
-	stroller_flist_init (&(res->dir_file));
-	stroller_flist_init (&(res->dir_subdir));
+	file_list_init (&(res->dir_file));
+	file_list_init (&(res->dir_subdir));
 
-	return stroller_flist_add (&(res->dir_subdir), dir);
+	return file_list_add (&(res->dir_subdir), dir);
 }
 
 int
@@ -156,14 +83,14 @@ strolldir_scan (stroller_t *res)
 #if 0
 				fprintf (stderr, "found dir: %s\n", fullpath);
 #endif
-				stroller_flist_add (&(res->dir_subdir), fullpath);
+				file_list_add (&(res->dir_subdir), fullpath);
 				break;
 
 			case DT_REG:
 #if 0
 				fprintf (stderr, "found file: %s\n", fullpath);
 #endif
-				stroller_flist_add (&(res->dir_file), fullpath);
+				file_list_add (&(res->dir_file), fullpath);
 				break;
 		}
 	}
@@ -173,7 +100,7 @@ strolldir_scan (stroller_t *res)
 	return errno;
 }
 
-const struct stroller_flist*
+const struct file_list*
 strolldir_getfiles (stroller_t *res)
 {
 	return &(res->dir_file);
@@ -182,9 +109,9 @@ strolldir_getfiles (stroller_t *res)
 const char*
 strolldir_nextdir (stroller_t *res)
 {
-	stroller_flist_delete (&(res->dir_subdir));
-	stroller_flist_free (&(res->dir_file));
-	stroller_flist_init (&(res->dir_file));
+	file_list_delete (&(res->dir_subdir));
+	file_list_free (&(res->dir_file));
+	file_list_init (&(res->dir_file));
 
 	return strolldir_getdir (res);
 }
@@ -198,7 +125,7 @@ strolldir_eol (stroller_t *res)
 void
 strolldir_close (stroller_t *res)
 {
-	stroller_flist_free (&(res->dir_file));
-	stroller_flist_free (&(res->dir_subdir));
+	file_list_free (&(res->dir_file));
+	file_list_free (&(res->dir_subdir));
 }
 

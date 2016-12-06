@@ -65,8 +65,8 @@ static int
 scan_dir (const char *p, const char *dirname)
 {
 	stroller_t dir;
-	struct stroller_flist_path *path_iter;
-	const struct stroller_flist *files;
+	struct file_list_path *path_iter;
+	const struct file_list *files;
 	struct testmagic testmagic;
 	int exitno, has_file;
 
