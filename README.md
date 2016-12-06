@@ -40,7 +40,7 @@ TCHunt-ng exits with one of the following exit codes:
 
 ## Limitations
 
-Small files (< 32 B) are skipped in the *Chi-squared test*. TCHunt-ng has no way to tell apart a genuinely encrypted file and a file made up of random data.
+TCHunt-ng has no way to tell apart a genuinely encrypted file and a file made up of random data.
 
 ## References
 
