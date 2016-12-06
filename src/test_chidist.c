@@ -54,16 +54,20 @@ struct chidist_freqmodel
 };
 
 static struct chidist_freqmodel chidist_model[] = {
+	// The structure below is here only to ignore empty files.
+	// The rationale is, that if a file is empty, it's value of chi-squared
+	// test cannot be >0.
+	{ 0, 1.0, 1.0 },
 	{ 32, 196.000000, 593.291819 },
 	{ 64, 144.000000, 467.386570 },
 	{ 128, 89.593974, 389.249832 },
 	{ 256, 82.659013, 323.371657 },
-	{ 512, 109.822641, 318.605035 },
+	{ 512, 109.822641, 330.000000 },
 	{ 1024, 143.000818, 377.772000 },
-	{ 2048, 153.221959, 394.369475 },
+	{ 2048, 153.221959, 397.000000 },
 	{ 4096, 155.652930, 388.681266 },
-	{ 8192, 156.930151, 385.302611 },
-	{ 16384, 161.667247, 375.954906 }
+	{ 8192, 156.375000, 389.375000 },
+	{ 16384, 161.667247, 381.406250 }
 };
 
 static inline double
@@ -71,10 +75,16 @@ derive_closest (double num)
 {
 	double res;
 
+	if ( num == 0 )
+		return 0;
+
 	res = pow (2, round (log2 (num)));
 
-	if ( res < CHDMODEL_MINLEN || res > CHDMODEL_MAXLEN )
-		return -1.0;
+	if ( res < CHDMODEL_MINLEN )
+		return CHDMODEL_MINLEN;
+
+	if ( res > CHDMODEL_MAXLEN )
+		return CHDMODEL_MAXLEN;
 
 	return res;
 }
@@ -83,6 +93,9 @@ static inline double
 derive_cindex (double model_len)
 {
 	double res;
+
+	if ( model_len == 0 )
+		return 0;
 
 	res = log2 (model_len);
 
@@ -99,12 +112,6 @@ chidist_freqmodel_lookup_closest (size_t data_len)
 	size_t model_idx;
 
 	model_len = derive_closest ((double) (data_len * 1.0));
-
-	if ( model_len == -1 ){
-		errno = EINVAL;
-		return NULL;
-	}
-
 	model_idx = (size_t) derive_cindex (model_len);
 
 	if ( model_idx == -1 ){
@@ -178,7 +185,7 @@ testchidist_x2 (const char *file_path)
 		// FIXME: do not print anything!
 		fprintf (stderr, "\e[31m%s :: len: %zu, chi: %lf: cannot obtain closest model\e[0m\n", file_path, buff_len, chi);
 #endif
-		return 0;
+		return -1;
 	}
 
 	if ( chi < model->m_min || chi > model->m_max ){
