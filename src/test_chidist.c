@@ -54,20 +54,19 @@ struct chidist_freqmodel
 };
 
 static struct chidist_freqmodel chidist_model[] = {
-	// The structure below is here only to ignore empty files.
-	// The rationale is, that if a file is empty, it's value of chi-squared
-	// test cannot be >0.
+	// The rationale here is that result of chi-squared test on empty data
+	// cannot be >0. Empty files will not pass the test.
 	{ 0, 1.0, 1.0 },
 	{ 32, 196.000000, 593.291819 },
-	{ 64, 144.000000, 467.386570 },
-	{ 128, 89.593974, 389.249832 },
-	{ 256, 82.659013, 323.371657 },
-	{ 512, 109.822641, 330.000000 },
-	{ 1024, 143.000818, 377.772000 },
-	{ 2048, 153.221959, 397.000000 },
-	{ 4096, 155.652930, 388.681266 },
-	{ 8192, 156.375000, 389.375000 },
-	{ 16384, 161.667247, 381.406250 }
+	{ 64, 144.000000, 483.750000 },
+	{ 128, 85.000000, 389.249832 },
+	{ 256, 76.000000, 323.371657 },
+	{ 512, 108.000000, 330.000000 },
+	{ 1024, 138.000000, 384.500000 },
+	{ 2048, 140.750000, 401.250000 },
+	{ 4096, 149.000000, 397.125000 },
+	{ 8192, 146.312500, 389.375000 },
+	{ 16384, 156.031250, 384.531250 }
 };
 
 static inline double
