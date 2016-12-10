@@ -18,13 +18,32 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mempool.h"
 #include "file_list.h"
+
+/* Memory pool to speed up dynamic memory allocation for the new nodes. */
+static struct mempool pool;
+/* A flag that denotes whether the memory pool has already been initialized. */
+static int pool_init = 0;
+
+/* Each time a list is initialized by calling the function file_list_init, the
+ * value of obj_refc gets incremented. Each time a list is free by calling the
+ * function file_list_free, the value of objc_refc gets decremented.  This
+ * variable makes sure the memory pool is initialized only once before a very
+ * first list is initialized, and freed after the last list has been freed.
+ */
+static int obj_refc = 0;
 
 void
 file_list_init (struct file_list *list)
 {
-	list->head = NULL;
-	list->tail = NULL;
+	if ( pool_init == 0 ){
+		mempool_init (&pool);
+		pool_init = 1;
+	}
+
+	memset (list, 0, sizeof (struct file_list_path));
+	obj_refc += 1;
 }
 
 int
@@ -32,7 +51,8 @@ file_list_add (struct file_list *list, const char *path)
 {
 	struct file_list_path *new_path;
 
-	new_path = malloc (sizeof (struct file_list_path));
+	//new_path = malloc (sizeof (struct file_list_path));
+	new_path = (struct file_list_path*) mempool_alloc (&pool);
 
 	if ( new_path == NULL )
 		return 1;
@@ -70,7 +90,8 @@ file_list_delete (struct file_list *list)
 	if ( list->head->path != NULL )
 		free (list->head->path);
 
-	free (list->head);
+	//free (list->head);
+	mempool_free (&pool, (usrmem_t*) list->head);
 
 	list->head = next_path;
 }
@@ -88,8 +109,16 @@ file_list_free (struct file_list *list)
 		if ( path_iter->path != NULL )
 			free (path_iter->path);
 
-		free (path_iter);
+		//free (path_iter);
+		mempool_free (&pool, (usrmem_t*) path_iter);
 		path_iter = path_iter_next;
+	}
+
+	obj_refc -= 1;
+
+	if ( pool_init == 1 && obj_refc == 0 ){
+		mempool_destroy (&pool);
+		pool_init = 0;
 	}
 }
 
