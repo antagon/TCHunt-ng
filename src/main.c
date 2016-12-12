@@ -44,6 +44,7 @@ static void
 interrupt (int signo)
 {
 	sig_int = signo;
+	signal (signo, SIG_DFL);
 }
 
 static void
@@ -91,7 +92,7 @@ scan_dir (const char *p, const char *dirname)
 
 			// Terminate if the error is something severe rather than access
 			// permissions violation.
-			if ( errno != EACCES ){
+			if ( errno != EACCES && errno != ENOENT ){
 				exitno = EXIT_FAILURE;
 				goto cleanup;
 			}

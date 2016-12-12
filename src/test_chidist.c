@@ -57,16 +57,16 @@ static struct chidist_freqmodel chidist_model[] = {
 	// The rationale here is that result of chi-squared test on empty data
 	// cannot be >0. Empty files will not pass the test.
 	{ 0, 1.0, 1.0 },
-	{ 32, 196.000000, 593.291819 },
+	{ 32, 196.000000, 610.750000 },
 	{ 64, 144.000000, 483.750000 },
 	{ 128, 85.000000, 389.249832 },
 	{ 256, 76.000000, 323.371657 },
 	{ 512, 108.000000, 330.000000 },
-	{ 1024, 138.000000, 384.500000 },
+	{ 1024, 138.000000, 393.000000 },
 	{ 2048, 140.750000, 401.250000 },
-	{ 4096, 149.000000, 397.125000 },
-	{ 8192, 146.312500, 389.375000 },
-	{ 16384, 156.031250, 384.531250 }
+	{ 4096, 149.000000, 400.875000 },
+	{ 8192, 146.312500, 395.937500 },
+	{ 16384, 154.406250, 384.531250 }
 };
 
 static inline double
@@ -139,8 +139,11 @@ testchidist_x2 (const char *file_path)
 
 	file = fopen (file_path, "rb");
 
-	if ( file == NULL )
+	if ( file == NULL ){
+		if ( errno == ENODATA || errno == ENOENT || errno == EIO )
+			return 0;
 		return -1;
+	}
 
 	if ( fseek (file, 0, SEEK_END) == -1 ){
 		fclose (file);
