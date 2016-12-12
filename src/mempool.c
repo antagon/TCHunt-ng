@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#if 1
+#if 0
 #include <stdio.h>
 #endif
 #include <stdlib.h>
@@ -49,12 +49,13 @@ mempool_init (struct mempool *res)
 {
 	memset (res, 0, sizeof (struct mempool));
 
-#if 1
+#if 0
 	fprintf (stderr, "MEMPOOL: initialized...\n");
 #endif
 }
 
-#define ALLOC_N 32
+#define calc_next_size(num) (((num) < 9)? 3:6) + (num)
+#define calc_prev_size(num) (num) - (((num) > 9)? 6:3)
 
 usrmem_t*
 mempool_alloc (struct mempool *res)
@@ -62,20 +63,22 @@ mempool_alloc (struct mempool *res)
 	union mmem *new_mem;
 
 	if ( res->m_free == NULL ){
+		size_t add_cnt = calc_next_size (res->m_nmemb);
 		union mmem *new_block;
-		size_t new_block_size = ALLOC_N;
 
-#if 1
-		fprintf (stderr, "MEMPOOL: allocating (+%zd)...\n", new_block_size);
-#endif
-
-		new_block = mmem_alloc (new_block_size, res->m_pool);
+		new_block = mmem_alloc (add_cnt, res->m_pool);
 
 		if ( new_block == NULL )
 			return NULL;
 
 		res->m_pool = new_block;
 		res->m_free = new_block;
+		res->m_nmemb += add_cnt;
+		res->m_nblk += 1;
+
+#if 0
+		fprintf (stderr, "MEMPOOL: allocated (+%zd, blks: %zd, nmemb: %zd)...\n", add_cnt, res->m_nblk, res->m_nmemb);
+#endif
 	}
 
 	new_mem = res->m_free;
@@ -97,10 +100,12 @@ mempool_destroy (struct mempool *res)
 	if ( res == NULL )
 		return;
 
-	free (res->m_pool);
+	if ( res->m_nmemb == 0 )
+		return;
 
-#if 1
-	fprintf (stderr, "MEMPOOL: freed...\n");
+#if 0
+	fprintf (stderr, "MEMPOOL: freed (blks: %zd, nmemb: %zd)...\n", res->m_nblk, res->m_nmemb);
 #endif
+        // TODO
 }
 

@@ -32,6 +32,8 @@ struct mempool
 {
 	union mmem *m_pool;
 	union mmem *m_free;
+	size_t m_nblk;
+	size_t m_nmemb;
 };
 
 extern void mempool_init (struct mempool *res);
