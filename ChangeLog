@@ -7,7 +7,9 @@ password text file.
 
 * Ignore symbolic links when strolling through a directory.
 
-* Do not treat ENODATA as an error, ignore the file instead.
+* Do not treat ENODATA, ENOENT, EIO as an error, ignore the file instead.
+These errors can be encountered when strolling through directories with
+special files (i.e. /proc, /sys).
 
 * Recognize smaller files. The solution is to use model data computed from a
 pool of random data for individual lengths of power of 2 (2^5, 2^6,...).
