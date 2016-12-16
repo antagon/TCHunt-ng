@@ -30,16 +30,16 @@ mmem_alloc (size_t n, union mmem *prev_block)
 	union mmem *new_block;
 	size_t i;
 
-	new_block = (union mmem*) calloc (n + 1, sizeof (usrmem_t));
+	new_block = (union mmem*) calloc (n, sizeof (usrmem_t));
 
 	if ( new_block == NULL )
 		return NULL;
 
-	for ( i = 0; i < (n - 1); i++ )
+	for ( i = 0; i < (n - 2); i++ )
 		new_block[i].next = &(new_block[i + 1]);
 
-	new_block[n - 1].next = NULL;
-	new_block[n].next = prev_block;
+	new_block[n - 2].next = NULL;
+	new_block[n - 1].next = prev_block;
 
 	return new_block;
 }
@@ -54,8 +54,9 @@ mempool_init (struct mempool *res)
 #endif
 }
 
-#define calc_next_size(num) (((num) < 9)? 3:6) + (num)
-#define calc_prev_size(num) (num) - (((num) > 9)? 6:3)
+// FIXME: use better algorithm!
+#define calc_next_size(num) 64
+#define calc_prev_size(num) ((num) - calc_next_size (num))
 
 usrmem_t*
 mempool_alloc (struct mempool *res)
@@ -97,15 +98,32 @@ mempool_free (struct mempool *res, usrmem_t *mem)
 void
 mempool_destroy (struct mempool *res)
 {
+	union mmem *mem_nextblk;
+	size_t chunk_size;
+
 	if ( res == NULL )
 		return;
 
 	if ( res->m_nmemb == 0 )
 		return;
 
+	while ( res->m_pool != NULL ){
+		chunk_size = res->m_nmemb - calc_prev_size (res->m_nmemb);
+		mem_nextblk = res->m_pool[chunk_size - 1].next;
+
+		free (res->m_pool);
+
+		res->m_pool = mem_nextblk;
+		res->m_nmemb -= chunk_size;
+		res->m_nblk -= 1;
+
+#if 0
+		fprintf (stderr, "MEMPOOL: deleted (-%zd, blks: %zd, nmemb: %zd)...\n", chunk_size, res->m_nblk, res->m_nmemb);
+#endif
+	}
+
 #if 0
 	fprintf (stderr, "MEMPOOL: freed (blks: %zd, nmemb: %zd)...\n", res->m_nblk, res->m_nmemb);
 #endif
-        // TODO
 }
 
