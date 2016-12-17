@@ -52,7 +52,6 @@ file_list_add (struct file_list *list, const char *path)
 {
 	struct file_list_path *new_path;
 
-	//new_path = malloc (sizeof (struct file_list_path));
 	new_path = (struct file_list_path*) mempool_alloc (&pool);
 
 	if ( new_path == NULL )
@@ -91,7 +90,6 @@ file_list_delete (struct file_list *list)
 	if ( list->head->path != NULL )
 		free (list->head->path);
 
-	//free (list->head);
 	mempool_free (&pool, (usrmem_t*) list->head);
 
 	list->head = next_path;
@@ -110,7 +108,6 @@ file_list_free (struct file_list *list)
 		if ( path_iter->path != NULL )
 			free (path_iter->path);
 
-		//free (path_iter);
 		mempool_free (&pool, (usrmem_t*) path_iter);
 		path_iter = path_iter_next;
 	}
