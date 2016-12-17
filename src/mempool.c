@@ -54,9 +54,8 @@ mempool_init (struct mempool *res)
 #endif
 }
 
-// FIXME: use better algorithm!
-#define calc_next_size(num) 64
-#define calc_prev_size(num) ((num) - calc_next_size (num))
+#define calc_next_size(num) ((((num) == 0)? 1:(num)) * 2)
+#define calc_prev_size(num) (((num) / 3))
 
 usrmem_t*
 mempool_alloc (struct mempool *res)
