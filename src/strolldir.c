@@ -15,7 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#if 0
 #include <stdio.h>
+#endif
 #include <stdlib.h>
 #include <dirent.h>
 #include <sys/types.h>
@@ -33,11 +35,19 @@ strolldir_getdir (stroller_t *res)
 	return res->dir_subdir.head->path;
 }
 
+#ifdef _WIN32
+#define FILE_SEPARATOR '\\'
+#else
+#define FILE_SEPARATOR '/'
+#endif
+
 int
 strolldir_open (stroller_t *res, const char *dir)
 {
-	memset (res, 0, sizeof (stroller_t));
+	if ( dir == NULL || strlen (dir) == 0 )
+		return 1;
 
+	memset (res, 0, sizeof (stroller_t));
 	file_list_init (&(res->dir_file));
 	file_list_init (&(res->dir_subdir));
 
@@ -50,22 +60,26 @@ strolldir_scan (stroller_t *res)
 	DIR *dir;
 	const char *dirname;
 	struct dirent *dir_entry;
-	char fullpath[PATH_MAX];
+	char fullpath[PATH_MAX + 1];
+	size_t dirname_len;
 
 	dirname = strolldir_getdir (res);
 
 	if ( dirname == NULL )
 		return EINVAL;
 
-#if 0
-	fprintf (stderr, "reading %s\n", dirname);
-#endif
-
 	dir = opendir (dirname);
 
 	if ( dir == NULL )
 		return errno;
 
+	strncpy (fullpath, dirname, sizeof (fullpath) - 1);
+	fullpath[sizeof (fullpath) - 1] = '\0';
+
+	if ( fullpath[strlen (fullpath) - 1] != FILE_SEPARATOR )
+		fullpath[strlen (fullpath)] = FILE_SEPARATOR;
+
+	dirname_len = strlen (fullpath);
 	errno = 0;
 
 	while ( (dir_entry = readdir (dir)) ){
@@ -73,26 +87,27 @@ strolldir_scan (stroller_t *res)
 		if ( strcmp (".", dir_entry->d_name) == 0 || strcmp ("..", dir_entry->d_name) == 0 )
 			continue;
 
-		if ( dirname[strlen (dirname) - 1] == '/' )
-			snprintf (fullpath, sizeof (fullpath), "%s%s", dirname, dir_entry->d_name);
-		else
-			snprintf (fullpath, sizeof (fullpath), "%s/%s", dirname, dir_entry->d_name);
+		strncat (fullpath, dir_entry->d_name, (sizeof (fullpath) - 1) - dirname_len);
 
 		switch ( dir_entry->d_type ){
 			case DT_DIR:
 #if 0
-				fprintf (stderr, "found dir: %s\n", fullpath);
+				fprintf (stderr, "adding a directory: %s\n", fullpath);
 #endif
 				file_list_add (&(res->dir_subdir), fullpath);
 				break;
 
 			case DT_REG:
 #if 0
-				fprintf (stderr, "found file: %s\n", fullpath);
+				fprintf (stderr, "adding a file: %s\n", fullpath);
 #endif
 				file_list_add (&(res->dir_file), fullpath);
 				break;
 		}
+
+		/* Terminate the string right after the end of a directory name so that
+		 * strncat can append a file name correctly. */
+		fullpath[dirname_len] = '\0';
 	}
 
 	closedir (dir);
