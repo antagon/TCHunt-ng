@@ -37,12 +37,17 @@ map_char_counts (const unsigned char *buff, size_t buff_len, size_t array_cnt[25
 	}
 }
 
+/*
+ * Minimum value should correspond to the minimum non-zero value in the model
+ * and vice-versa.
+ */
 #define CHDMODEL_MINLEN 32
 #define CHDMODEL_MAXLEN 16384
 
-// NOTICE: If you change the value of CHDMODEL_???LEN, change also the values
-// below.  These contants are here so we do not have to calculate log2 of
-// CHDMODEL_???LEN on runtime.
+/* NOTICE: If you change the value of CHDMODEL_???LEN, change also the values
+ * below.  These contants are here so we do not have to calculate log2 of
+ * CHDMODEL_???LEN on runtime.
+ */
 #define CHDMODEL_MINEXP 5
 #define CHDMODEL_MAXEXP 14
 
@@ -54,8 +59,9 @@ struct chidist_freqmodel
 };
 
 static struct chidist_freqmodel chidist_model[] = {
-	// The rationale here is that result of chi-squared test on empty data
-	// cannot be >0. Empty files will not pass the test.
+	/* The rationale here is that result of chi-squared test on empty data
+	 * cannot be >0. Empty files will not pass the test.
+	 */
 	{ 0, 1.0, 1.0 },
 	{ 32, 196.000000, 610.750000 },
 	{ 64, 144.000000, 500.000000 },
@@ -184,7 +190,6 @@ testchidist_x2 (const char *file_path)
 
 	if ( model == NULL ){
 #if 0
-		// FIXME: do not print anything!
 		fprintf (stderr, "\e[31m%s :: len: %zu, chi: %lf: cannot obtain closest model\e[0m\n", file_path, buff_len, chi);
 #endif
 		return -1;
