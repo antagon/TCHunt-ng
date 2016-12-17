@@ -11,7 +11,7 @@ password text file.
 These errors can be encountered when strolling through directories with
 special files (i.e. /proc, /sys).
 
-* Recognize smaller files. The solution is to use model data computed from a
+* Recognize smaller files. The solution is based on model data computed from a
 pool of random data for individual lengths of power of 2 (2^5, 2^6,...).
 
 * Exit gracefully when a signal is delivered to a running instance of the
