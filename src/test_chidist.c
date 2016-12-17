@@ -203,7 +203,7 @@ testchidist_x2 (const char *file_path)
 	}
 
 #if 0
-	fprintf (stdout, "\e[92m%s :: len: %zu, chi: %lf\e[0m\n", file_path, buff_len, chi);
+	fprintf (stderr, "\e[92m%s :: len: %zu, chi: %lf\e[0m\n", file_path, buff_len, chi);
 #endif
 
 	return 1;
