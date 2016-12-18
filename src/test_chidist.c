@@ -107,24 +107,23 @@ derive_cindex (double model_len)
 	if ( res < CHDMODEL_MINEXP || res > CHDMODEL_MAXEXP )
 		return -1.0;
 
-	return res - CHDMODEL_MINEXP;
+	return (res - CHDMODEL_MINEXP) + 1;
 }
 
 static struct chidist_freqmodel*
 chidist_freqmodel_lookup_closest (size_t data_len)
 {
-	double model_len;
-	size_t model_idx;
+	double model_len, model_idx;
 
 	model_len = derive_closest ((double) (data_len * 1.0));
-	model_idx = (size_t) derive_cindex (model_len);
+	model_idx = derive_cindex (model_len);
 
 	if ( model_idx == -1 ){
 		errno = EINVAL;
 		return NULL;
 	}
 
-	return &(chidist_model[model_idx]);
+	return &(chidist_model[(size_t) model_idx]);
 }
 
 #define X2_SAMPLE_LEN 16384
@@ -197,13 +196,13 @@ testchidist_x2 (const char *file_path)
 
 	if ( chi < model->m_min || chi > model->m_max ){
 #if 0
-		fprintf (stderr, "\e[31m%s :: len: %zu, chi: %lf\e[0m\n", file_path, buff_len, chi);
+		fprintf (stderr, "\e[31m%s :: len: %zu, model_len: %zu, chi: %lf\e[0m\n", file_path, buff_len, model->m_len, chi);
 #endif
 		return 0;
 	}
 
 #if 0
-	fprintf (stderr, "\e[92m%s :: len: %zu, chi: %lf\e[0m\n", file_path, buff_len, chi);
+	fprintf (stderr, "\e[92m%s :: len: %zu, model_len: %zu, chi: %lf\e[0m\n", file_path, buff_len, model->m_len, chi);
 #endif
 
 	return 1;
