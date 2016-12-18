@@ -22,21 +22,6 @@
 #include <math.h>
 #include <string.h>
 
-static void
-map_char_counts (const unsigned char *buff, size_t buff_len, size_t array_cnt[256])
-{
-	size_t i;
-	unsigned char byte_val;
-
-	memset (array_cnt, 0, sizeof (size_t) * 256);
-
-	for ( i = 0; i < buff_len; i++ ){
-		byte_val = buff[i];
-
-		array_cnt[byte_val] += 1;
-	}
-}
-
 /*
  * Minimum value should correspond to the minimum non-zero value in the model
  * and vice-versa.
@@ -127,7 +112,22 @@ chidist_freqmodel_lookup_closest (size_t data_len)
 }
 
 #define X2_SAMPLE_LEN 16384
-#define X2_POSSIBILITIES UCHAR_MAX
+#define X2_POSSIBILITIES 256
+
+static void
+map_char_counts (const unsigned char *buff, size_t buff_len, size_t array_cnt[X2_POSSIBILITIES])
+{
+	size_t i;
+	unsigned char byte_val;
+
+	memset (array_cnt, 0, sizeof (size_t) * X2_POSSIBILITIES);
+
+	for ( i = 0; i < buff_len; i++ ){
+		byte_val = buff[i];
+
+		array_cnt[byte_val] += 1;
+	}
+}
 
 int
 testchidist_x2 (const char *file_path)
