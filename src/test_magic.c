@@ -52,7 +52,7 @@ testmagic_test (struct testmagic *testmagic, const char *file)
 	ftype = magic_file (testmagic->magic_res, file);
 
 	if ( ftype == NULL ){
-		if ( errno == ENODATA )
+		if ( errno == ENODATA || errno == ENOENT || errno == EIO )
 			return 0;
 		return -1;
 	}

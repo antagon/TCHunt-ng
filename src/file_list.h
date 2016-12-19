@@ -15,31 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _STROLLDIR_H
-#define _STROLLDIR_H
+#ifndef _FILE_LIST_H
+#define _FILE_LIST_H
 
-#include "file_list.h"
-
-typedef struct
+struct file_list_path
 {
-	struct file_list dir_file;
-	struct file_list dir_subdir;
-	int eol;
-} stroller_t;
+	char *path;
+	struct file_list_path *next;
+};
 
-extern int strolldir_open (stroller_t *res, const char *dir);
+struct file_list
+{
+	struct file_list_path *head;
+	struct file_list_path *tail;
+};
 
-extern int strolldir_scan (stroller_t *res);
+extern void file_list_init (struct file_list *list);
 
-extern const struct file_list* strolldir_getfiles (stroller_t *res);
+extern int file_list_add (struct file_list *list, const char *path);
 
-extern const char* strolldir_getdir (stroller_t *res);
+extern void file_list_delete (struct file_list *list);
 
-extern const char* strolldir_nextdir (stroller_t *res);
-
-extern int strolldir_eol (stroller_t *res);
-
-extern void strolldir_close (stroller_t *res);
+extern void file_list_free (struct file_list *list);
 
 #endif
 

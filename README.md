@@ -23,9 +23,10 @@ TCHunt-ng performs following tests against content of a file to determine if it 
 
 TCHunt-ng exits with one of the following exit codes:
 
-* `0` - content of a file is *most likely* encrypted.
+* `0` - content of a file is *likely* to be encrypted.
 * `1` - a generic error occured.
-* `2` - no encrypted files were found.
+* `2` - content is not encrypted / no encrypted files were found.
+* `3` - interrupted by a signal.
 
 ## Requirements
 
@@ -39,7 +40,7 @@ TCHunt-ng exits with one of the following exit codes:
 
 ## Limitations
 
-Small files (< 13kB) are harder to pick up on. False positives are rare, yet they do happen for files with high enough randomness. TCHunt-ng has no way to tell apart a genuinely encrypted file and a file made up of random data.
+TCHunt-ng has no way to tell apart a genuinely encrypted file and a file made up of random data.
 
 ## References
 

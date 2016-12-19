@@ -15,31 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _STROLLDIR_H
-#define _STROLLDIR_H
+#ifndef _MEMPOOL_H
+#define _MEMPOOL_H
 
 #include "file_list.h"
 
-typedef struct
+typedef struct file_list_path usrmem_t;
+
+union mmem
 {
-	struct file_list dir_file;
-	struct file_list dir_subdir;
-	int eol;
-} stroller_t;
+	usrmem_t mem;
+	union mmem *next;
+};
 
-extern int strolldir_open (stroller_t *res, const char *dir);
+struct mempool
+{
+	union mmem *m_pool;
+	union mmem *m_free;
+	size_t m_nblk;
+	size_t m_nmemb;
+};
 
-extern int strolldir_scan (stroller_t *res);
+extern void mempool_init (struct mempool *res);
 
-extern const struct file_list* strolldir_getfiles (stroller_t *res);
+extern usrmem_t* mempool_alloc (struct mempool *res);
 
-extern const char* strolldir_getdir (stroller_t *res);
+extern void mempool_free (struct mempool *res, usrmem_t *mem);
 
-extern const char* strolldir_nextdir (stroller_t *res);
-
-extern int strolldir_eol (stroller_t *res);
-
-extern void strolldir_close (stroller_t *res);
+extern void mempool_destroy (struct mempool *res);
 
 #endif
 

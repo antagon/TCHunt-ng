@@ -1,13 +1,22 @@
-version 1.1 - 2016-11-??
+version 1.1 - 2016-12-18
 ------------------------
 
-* New recognized file-types: OpenSSH keys (public/private), PEM private keys
+* Newly recognized file-types: OpenSSH keys (public/private), PEM private keys
 (RSA/DSA/EC), Keepass password database, Password Safe V3 database, cvs
 password text file.
 
 * Ignore symbolic links when strolling through a directory.
 
-* Do not treat ENODATA as an error, ignore the file instead.
+* Do not treat ENODATA, ENOENT, EIO as an error, ignore the file instead.
+These errors can be encountered when strolling through directories with
+special files (i.e. /proc, /sys).
+
+* Recognize content of different sizes. The solution is based on model data
+computed from a pool of random data for individual lengths of power of 2 (2^5,
+2^6,...).
+
+* Exit gracefully when a signal is delivered to a running instance of the
+program and return proper exit code.
 
 version 1.0 - 2016-11-27
 ------------------------

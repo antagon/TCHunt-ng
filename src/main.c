@@ -20,6 +20,7 @@
 #include <string.h>
 #include <errno.h>
 #include <getopt.h>
+#include <signal.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <magic.h>
@@ -30,6 +31,21 @@
 #include "test_chidist.h"
 
 #define TCHUNTNG_VERSION "1.0"
+
+enum
+{
+	EXIT_NOTFOUND = 2,
+	EXIT_SIGNAL = 3
+};
+
+static int sig_int = 0;
+
+static void
+interrupt (int signo)
+{
+	sig_int = signo;
+	signal (signo, SIG_DFL);
+}
 
 static void
 usage (const char *p)
@@ -46,14 +62,12 @@ version_info (void)
 	fprintf (stdout, "TCHunt-ng %s\n", TCHUNTNG_VERSION);
 }
 
-#define EXIT_NOTFOUND 2
-
 static int
 scan_dir (const char *p, const char *dirname)
 {
 	stroller_t dir;
-	struct stroller_flist_path *path_iter;
-	const struct stroller_flist *files;
+	struct file_list_path *path_iter;
+	const struct file_list *files;
 	struct testmagic testmagic;
 	int exitno, has_file;
 
@@ -78,7 +92,7 @@ scan_dir (const char *p, const char *dirname)
 
 			// Terminate if the error is something severe rather than access
 			// permissions violation.
-			if ( errno != EACCES ){
+			if ( errno != EACCES && errno != ENOENT ){
 				exitno = EXIT_FAILURE;
 				goto cleanup;
 			}
@@ -86,7 +100,7 @@ scan_dir (const char *p, const char *dirname)
 
 		files = strolldir_getfiles (&dir);
 
-		for ( path_iter = files->head; path_iter != NULL; path_iter = path_iter->next ){
+		for ( path_iter = files->head; path_iter != NULL && !sig_int; path_iter = path_iter->next ){
 
 			switch ( testmagic_test (&testmagic, path_iter->path) ){
 				case -1:
@@ -125,10 +139,13 @@ test_success:
 			fprintf (stdout, "%s\n", path_iter->path);
 		}
 
-	} while ( strolldir_nextdir (&dir) );
+	} while ( strolldir_nextdir (&dir) && !sig_int );
 
 	if ( ! has_file )
 		exitno = EXIT_NOTFOUND;
+
+	if ( sig_int )
+		exitno = EXIT_SIGNAL;
 
 cleanup:
 	strolldir_close (&dir);
@@ -201,6 +218,9 @@ main (int argc, char *argv[])
 	exitno = EXIT_SUCCESS;
 	recursive = 0;
 	is_dir = 0;
+
+	signal (SIGTERM, interrupt);
+	signal (SIGINT, interrupt);
 
 	while ( (c = getopt (argc, argv, "rv")) != -1 ){
 		switch ( c ){

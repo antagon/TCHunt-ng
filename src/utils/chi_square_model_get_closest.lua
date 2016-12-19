@@ -11,7 +11,7 @@ end
 function derive_cindex (num)
 	-- Powers of 2
 	local min = 5
-	local max = 15
+	local max = 14
 	local exp = math.log (num) / math.log (2)
 
 	if exp < min or exp > max then
@@ -31,12 +31,11 @@ local model = {
 	[6] = { len = math.pow (2, 11), min = 0.0, max = 0.0 },
 	[7] = { len = math.pow (2, 12), min = 0.0, max = 0.0 },
 	[8] = { len = math.pow (2, 13), min = 0.0, max = 0.0 },
-	[9] = { len = math.pow (2, 14), min = 0.0, max = 0.0 },
-	[10] = { len = math.pow (2, 15), min = 0.0, max = 0.0 }
+	[9] = { len = math.pow (2, 14), min = 0.0, max = 0.0 }
 }
 
 math.randomseed (os.time ())
-local data_len = math.random (math.pow (2, 5), math.pow (2, 15))
+local data_len = math.random (math.pow (2, 5), math.pow (2, 14))
 local closest = derive_closest (data_len)
 local index = derive_cindex (closest)
 

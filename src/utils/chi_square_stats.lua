@@ -31,25 +31,27 @@ function update_chi_stats (stats, num)
 		stats.min = num
 		stats.max = num
 		stats.init = true
-		return
+		return true
 	end
 
 	if num < stats.min then
-		stats.min = (stats.min + num) / 2
-		return
+		stats.min = num
+		return true
 	end
 
 	if num > stats.max then
-		stats.max = (stats.max + num) / 2
-		return
+		stats.max = num
+		return true
 	end
+
+	return false
 end
 
 ----------------------------
 ----------------------------
 ----------------------------
 local chunks = {
-	{ len = math.pow (2, 5), stats = { min = nil, max = nil, init = false }},
+--[[	{ len = math.pow (2, 5), stats = { min = nil, max = nil, init = false }},
 	{ len = math.pow (2, 6), stats = { min = nil, max = nil, init = false }},
 	{ len = math.pow (2, 7), stats = { min = nil, max = nil, init = false }},
 	{ len = math.pow (2, 8), stats = { min = nil, max = nil, init = false }},
@@ -58,8 +60,17 @@ local chunks = {
 	{ len = math.pow (2, 11), stats = { min = nil, max = nil, init = false }},
 	{ len = math.pow (2, 12), stats = { min = nil, max = nil, init = false }},
 	{ len = math.pow (2, 13), stats = { min = nil, max = nil, init = false }},
-	{ len = math.pow (2, 14), stats = { min = nil, max = nil, init = false }},
-	{ len = math.pow (2, 15), stats = { min = nil, max = nil, init = false }}
+	{ len = math.pow (2, 14), stats = { min = nil, max = nil, init = false }}]]
+	{ len = 32, stats = { min = 196.000000, max = 610.750000, init = true }},
+	{ len = 64, stats = { min = 144.000000, max = 500.000000, init = true }},
+	{ len = 128, stats = { min = 85.000000, max = 389.249832, init = true }},
+	{ len = 256, stats = { min = 76.000000, max = 323.371657, init = true }},
+	{ len = 512, stats = { min = 108.000000, max = 330.000000, init = true }},
+	{ len = 1024, stats = { min = 138.000000, max = 393.000000, init = true }},
+	{ len = 2048, stats = { min = 140.750000, max = 401.250000, init = true }},
+	{ len = 4096, stats = { min = 149.000000, max = 400.875000, init = true }},
+	{ len = 8192, stats = { min = 146.312500, max = 395.937500, init = true }},
+	{ len = 16384, stats = { min = 154.406250, max = 384.531250, init = true }}
 }
 local rnd_source = "/dev/urandom"
 local poolsize_b = math.pow (1024, 3) * 100
@@ -83,14 +94,24 @@ for i = 0, (poolsize_b / read_b) do
 	end
 
 	for _, chunk in ipairs (chunks) do
+		local printme = false
+
 		for i = 1, read_b, chunk.len do
-			update_chi_stats (chunk.stats, chi_square (data:sub (i, i + chunk.len - 1)))
+			if update_chi_stats (chunk.stats, chi_square (data:sub (i, i + chunk.len - 1))) then
+				printme = true
+			end
+		end
+
+		if printme then
+			print (("{ %d, %f, %f },"):format (chunk.len, chunk.stats.min, chunk.stats.max))
 		end
 	end
 end
 
+print ("DONE!")
+
 for _, chunk in ipairs (chunks) do
-	print (("%d Bytes - (%f;%f)"):format (chunk.len, chunk.stats.min, chunk.stats.max))
+	print (("{ %d, %f, %f },"):format (chunk.len, chunk.stats.min, chunk.stats.max))
 end
 
 io.close (fd)
