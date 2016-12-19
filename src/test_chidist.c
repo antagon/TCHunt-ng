@@ -85,7 +85,7 @@ derive_cindex (double model_len)
 	double res;
 
 	if ( model_len == 0 )
-		return 0;
+		return 0.0;
 
 	res = log2 (model_len);
 
