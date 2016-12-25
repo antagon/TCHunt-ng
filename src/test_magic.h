@@ -18,6 +18,14 @@
 #ifndef _TEST_MAGIC_H
 #define _TEST_MAGIC_H
 
+enum {
+	TMAGIC_CAT_DATA = 1,
+	TMAGIC_CAT_ENCDATA,
+	TMAGIC_CAT_KEY,
+	TMAGIC_CAT_PASS,
+	_TMAGIC_CAT_EOF
+};
+
 struct testmagic
 {
 	magic_t magic_res;
@@ -25,11 +33,11 @@ struct testmagic
 
 extern int testmagic_init (struct testmagic *testmagic);
 
-extern int testmagic_test (struct testmagic *testmagic, const char *file);
+extern int testmagic_test (struct testmagic *testmagic, const char *file, const char **cat_type);
 
 extern void testmagic_free (struct testmagic *testmagic);
 
-extern const char *testmagic_error (struct testmagic *testmagic);
+extern const char* testmagic_error (struct testmagic *testmagic);
 
 #endif
 

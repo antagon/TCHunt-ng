@@ -15,9 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#if 0
 #include <stdio.h>
-#endif
 #include <stdlib.h>
 #include <string.h>
 #include <magic.h>
@@ -26,6 +24,10 @@
 #include "test_magic.h"
 
 #define MAGIC_FLAGS (MAGIC_NO_CHECK_APPTYPE | MAGIC_SYMLINK | MAGIC_NO_CHECK_COMPRESS | MAGIC_NO_CHECK_ELF | MAGIC_NO_CHECK_FORTRAN | MAGIC_NO_CHECK_TAR | MAGIC_NO_CHECK_TOKENS | MAGIC_NO_CHECK_TROFF)
+
+static const char *testmagic_cattype[_TMAGIC_CAT_EOF - 1] = {
+	"data", "ciphertext", "key", "password"
+};
 
 int
 testmagic_init (struct testmagic *testmagic)
@@ -44,7 +46,7 @@ testmagic_init (struct testmagic *testmagic)
 #define MATCHES(str, predicate) (strncmp ((str), (predicate), strlen ((predicate))) == 0)
 
 int
-testmagic_test (struct testmagic *testmagic, const char *file)
+testmagic_test (struct testmagic *testmagic, const char *file, const char **cat_type)
 {
 	const char *ftype;
 	int match;
@@ -57,32 +59,47 @@ testmagic_test (struct testmagic *testmagic, const char *file)
 		return -1;
 	}
 
-#if 0
-	fprintf (stderr, "%s : %s\n", file, ftype);
-#endif
-
 	match = 0;
 
-	if ( strcmp (ftype, "data") == 0 )
-		match = 1;
-	else if ( MATCHES (ftype, "PGP") )
-		match = 2;
-	else if ( MATCHES (ftype, "GPG") )
-		match = 2;
+	if ( MATCHES (ftype, "data") )
+		match = TMAGIC_CAT_DATA;
+	else if ( MATCHES (ftype, "PGP public key block") )
+		match = TMAGIC_CAT_KEY;
+	else if ( MATCHES (ftype, "PGP message") )
+		match = TMAGIC_CAT_ENCDATA;
+	else if ( MATCHES (ftype, "PGP\011Secret Key") )
+		match = TMAGIC_CAT_KEY;
+	else if ( MATCHES (ftype, "GPG symmetrically encrypted data") )
+		match = TMAGIC_CAT_ENCDATA;
+	else if ( MATCHES (ftype, "GPG encrypted data") )
+		match = TMAGIC_CAT_ENCDATA;
+	else if	( MATCHES (ftype, "PGP symmetric key encrypted data") )
+		match = TMAGIC_CAT_ENCDATA;
+	else if ( MATCHES (ftype, "PGP encrypted data") )
+		match = TMAGIC_CAT_ENCDATA;
+	else if ( MATCHES (ftype, "PGP RSA encrypted session key") )
+		match = TMAGIC_CAT_ENCDATA;
 	else if ( MATCHES (ftype, "OpenSSH") )
-		match = 2;
+		match = TMAGIC_CAT_KEY;
 	else if ( MATCHES (ftype, "PEM RSA private key") )
-		match = 2;
+		match = TMAGIC_CAT_KEY;
 	else if ( MATCHES (ftype, "PEM DSA private key") )
-		match = 2;
+		match = TMAGIC_CAT_KEY;
 	else if ( MATCHES (ftype, "PEM EC private key") )
-		match = 2;
+		match = TMAGIC_CAT_KEY;
 	else if ( MATCHES (ftype, "Keepass password database") )
-		match = 2;
+		match = TMAGIC_CAT_PASS;
 	else if ( MATCHES (ftype, "Password Safe V3 database") )
-		match = 2;
+		match = TMAGIC_CAT_PASS;
 	else if ( MATCHES (ftype, "cvs password text file") )
-		match = 2;
+		match = TMAGIC_CAT_PASS;
+
+	if ( match > 0 && cat_type != NULL )
+		*cat_type = testmagic_cattype[match - 1];
+
+#if 0
+	fprintf (stderr, "TESTMAGIC_DBG: %s (%s)\n", file, ftype);
+#endif
 
 	return match;
 }

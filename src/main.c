@@ -30,7 +30,7 @@
 #include "test_magic.h"
 #include "test_chidist.h"
 
-#define TCHUNTNG_VERSION "1.1"
+#define TCHUNTNG_VERSION "1.2"
 
 enum
 {
@@ -66,6 +66,7 @@ static int
 scan_dir (const char *p, const char *dirname)
 {
 	stroller_t dir;
+	const char *cat;
 	struct file_list_path *path_iter;
 	const struct file_list *files;
 	struct testmagic testmagic;
@@ -102,7 +103,7 @@ scan_dir (const char *p, const char *dirname)
 
 		for ( path_iter = files->head; path_iter != NULL && !sig_int; path_iter = path_iter->next ){
 
-			switch ( testmagic_test (&testmagic, path_iter->path) ){
+			switch ( testmagic_test (&testmagic, path_iter->path, &cat) ){
 				case -1:
 					fprintf (stderr, "%s: '%s': %s\n", p, path_iter->path, testmagic_error (&testmagic));
 					exitno = EXIT_FAILURE;
@@ -112,11 +113,11 @@ scan_dir (const char *p, const char *dirname)
 					// Read a next file...
 					continue;
 
-				case 1:
+				case TMAGIC_CAT_DATA:
 					// Follow up with other tests...
 					break;
 
-				case 2:
+				default:
 					goto test_success;
 			}
 
@@ -136,7 +137,7 @@ scan_dir (const char *p, const char *dirname)
 
 test_success:
 			has_file = 1;
-			fprintf (stdout, "%s\n", path_iter->path);
+			fprintf (stdout, "%s [%s]\n", path_iter->path, cat);
 		}
 
 	} while ( strolldir_nextdir (&dir) && !sig_int );
@@ -158,6 +159,7 @@ static int
 scan_file (const char *p, const char *filename)
 {
 	struct testmagic testmagic;
+	const char *cat;
 	int exitno;
 
 	exitno = EXIT_SUCCESS;
@@ -168,7 +170,7 @@ scan_file (const char *p, const char *filename)
 		goto cleanup;
 	}
 
-	switch ( testmagic_test (&testmagic, filename) ){
+	switch ( testmagic_test (&testmagic, filename, &cat) ){
 		case -1:
 			fprintf (stderr, "%s: '%s': %s\n", p, filename, testmagic_error (&testmagic));
 			exitno = EXIT_FAILURE;
@@ -178,11 +180,11 @@ scan_file (const char *p, const char *filename)
 			exitno = EXIT_NOTFOUND;
 			goto cleanup;
 
-		case 1:
+		case TMAGIC_CAT_DATA:
 			// Follow up with other tests...
 			break;
 
-		case 2:
+		default:
 			goto test_success;
 	}
 
@@ -201,7 +203,7 @@ scan_file (const char *p, const char *filename)
 	}
 
 test_success:
-	fprintf (stdout, "%s\n", filename);
+	fprintf (stdout, "%s [%s]\n", filename, cat);
 
 cleanup:
 	testmagic_free (&testmagic);
