@@ -133,13 +133,10 @@ int
 testchidist_x2 (const char *file_path)
 {
 	FILE *file;
-	size_t file_len;
+	size_t buff_len, /*file_len,*/ char_map[X2_POSSIBILITIES];
 	unsigned char buff[X2_SAMPLE_LEN];
-	size_t char_map[X2_POSSIBILITIES];
 	const struct chidist_freqmodel *model;
-	size_t buff_len;
-	double expected_freq;
-	double chi;
+	double expected_freq, chi;
 	int i;
 
 	file = fopen (file_path, "rb");
@@ -150,7 +147,7 @@ testchidist_x2 (const char *file_path)
 		return -1;
 	}
 
-	if ( fseek (file, 0, SEEK_END) == -1 ){
+	/*if ( fseek (file, 0, SEEK_END) == -1 ){
 		fclose (file);
 		return -1;
 	}
@@ -162,7 +159,7 @@ testchidist_x2 (const char *file_path)
 		return -1;
 	}
 
-	rewind (file);
+	rewind (file);*/
 
 	buff_len = fread (buff, 1, sizeof (buff), file);
 
