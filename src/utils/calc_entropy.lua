@@ -1,3 +1,4 @@
+#!/bin/env lua
 require ("math")
 
 math.log2 = function (num)
