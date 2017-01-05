@@ -23,16 +23,14 @@
 
 #include "test_magic.h"
 
-#define MAGIC_FLAGS (MAGIC_NO_CHECK_APPTYPE | MAGIC_SYMLINK | MAGIC_NO_CHECK_COMPRESS | MAGIC_NO_CHECK_ELF | MAGIC_NO_CHECK_FORTRAN | MAGIC_NO_CHECK_TAR | MAGIC_NO_CHECK_TOKENS | MAGIC_NO_CHECK_TROFF)
-
 static const char *testmagic_cattype[_TMAGIC_CAT_EOF - 1] = {
 	"data", "ciphertext", "key", "password"
 };
 
 int
-testmagic_init (struct testmagic *testmagic)
+testmagic_init (struct testmagic *testmagic, int flags)
 {
-	testmagic->magic_res = magic_open (MAGIC_FLAGS);
+	testmagic->magic_res = magic_open (flags);
 
 	if ( testmagic->magic_res == NULL )
 		return -1;

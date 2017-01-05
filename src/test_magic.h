@@ -18,6 +18,13 @@
 #ifndef _TEST_MAGIC_H
 #define _TEST_MAGIC_H
 
+#include <magic.h>
+
+#define TESTMAGIC_FLAGS (MAGIC_NO_CHECK_APPTYPE | MAGIC_SYMLINK | MAGIC_NO_CHECK_COMPRESS \
+					| MAGIC_NO_CHECK_ELF | MAGIC_NO_CHECK_FORTRAN | MAGIC_NO_CHECK_TAR \
+					| MAGIC_NO_CHECK_TOKENS | MAGIC_NO_CHECK_TROFF | MAGIC_NO_CHECK_CDF \
+					| MAGIC_NO_CHECK_APPTYPE | MAGIC_NO_CHECK_ENCODING)
+
 enum {
 	TMAGIC_CAT_DATA = 1,
 	TMAGIC_CAT_ENCDATA,
@@ -31,7 +38,7 @@ struct testmagic
 	magic_t magic_res;
 };
 
-extern int testmagic_init (struct testmagic *testmagic);
+extern int testmagic_init (struct testmagic *testmagic, int flags);
 
 extern int testmagic_test (struct testmagic *testmagic, const char *file, const char **cat_type);
 
