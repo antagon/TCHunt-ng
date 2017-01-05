@@ -60,7 +60,8 @@ usage (const char *p)
 	fprintf (stdout, "Usage: %s [options] <file>\n\n\
 Options:\n\
  -r  recursively traverse a directory\n\
- -q  treat no results as success\n\
+ -q  quietly treat no results as success\n\
+ -p  preserve access time of files analyzed\n\
  -v  show version information\n", p);
 }
 
@@ -238,7 +239,7 @@ main (int argc, char *argv[])
 	signal (SIGTERM, interrupt);
 	signal (SIGINT, interrupt);
 
-	while ( (c = getopt (argc, argv, "rqv")) != -1 ){
+	while ( (c = getopt (argc, argv, "rqpv")) != -1 ){
 		switch ( c ){
 			case 'r':
 				arg.recursive = 1;
@@ -246,6 +247,10 @@ main (int argc, char *argv[])
 
 			case 'q':
 				arg.quiet = 1;
+				break;
+
+			case 'p':
+				arg.noatime = 1;
 				break;
 
 			case 'v':
