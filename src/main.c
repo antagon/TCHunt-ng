@@ -38,6 +38,13 @@ enum
 	EXIT_SIGNAL = 3
 };
 
+static struct args
+{
+	int recursive;
+	int quiet;
+	int noatime;
+} arg;
+
 static int sig_int = 0;
 
 static void
@@ -53,6 +60,7 @@ usage (const char *p)
 	fprintf (stdout, "Usage: %s [options] <file>\n\n\
 Options:\n\
  -r  recursively traverse a directory\n\
+ -q  treat no results as success\n\
  -v  show version information\n", p);
 }
 
@@ -63,7 +71,7 @@ version_info (void)
 }
 
 static int
-scan_dir (const char *p, const char *dirname)
+scan_dir (const char *p, struct args *arg, const char *dirname)
 {
 	stroller_t dir;
 	const char *cat;
@@ -81,7 +89,7 @@ scan_dir (const char *p, const char *dirname)
 		goto cleanup;
 	}
 
-	if ( testmagic_init (&testmagic) == -1 ){
+	if ( testmagic_init (&testmagic, TESTMAGIC_FLAGS) == -1 ){
 		fprintf (stderr, "%s: %s\n", p, testmagic_error (&testmagic));
 		exitno = EXIT_FAILURE;
 		goto cleanup;
@@ -142,8 +150,10 @@ test_success:
 
 	} while ( strolldir_nextdir (&dir) && !sig_int );
 
-	if ( ! has_file )
-		exitno = EXIT_NOTFOUND;
+	if ( ! has_file ){
+		if ( ! arg->quiet )
+			exitno = EXIT_NOTFOUND;
+	}
 
 	if ( sig_int )
 		exitno = EXIT_SIGNAL;
@@ -156,7 +166,7 @@ cleanup:
 }
 
 static int
-scan_file (const char *p, const char *filename)
+scan_file (const char *p, struct args *arg, const char *filename)
 {
 	struct testmagic testmagic;
 	const char *cat;
@@ -164,7 +174,7 @@ scan_file (const char *p, const char *filename)
 
 	exitno = EXIT_SUCCESS;
 
-	if ( testmagic_init (&testmagic) == -1 ){
+	if ( testmagic_init (&testmagic, TESTMAGIC_FLAGS) == -1 ){
 		fprintf (stderr, "%s: %s\n", p, testmagic_error (&testmagic));
 		exitno = EXIT_FAILURE;
 		goto cleanup;
@@ -207,6 +217,9 @@ test_success:
 
 cleanup:
 	testmagic_free (&testmagic);
+
+	if ( exitno == EXIT_NOTFOUND && arg->quiet )
+		exitno = EXIT_SUCCESS;
 	
 	return exitno;
 }
@@ -215,19 +228,24 @@ int
 main (int argc, char *argv[])
 {
 	struct stat file_stat;
-	int exitno, c, recursive, is_dir;
+	int exitno, c, is_dir;
 
 	exitno = EXIT_SUCCESS;
-	recursive = 0;
 	is_dir = 0;
+
+	memset (&arg, 0, sizeof (struct args));
 
 	signal (SIGTERM, interrupt);
 	signal (SIGINT, interrupt);
 
-	while ( (c = getopt (argc, argv, "rv")) != -1 ){
+	while ( (c = getopt (argc, argv, "rqv")) != -1 ){
 		switch ( c ){
 			case 'r':
-				recursive = 1;
+				arg.recursive = 1;
+				break;
+
+			case 'q':
+				arg.quiet = 1;
 				break;
 
 			case 'v':
@@ -260,14 +278,14 @@ main (int argc, char *argv[])
 	}
 
 	if ( is_dir ){
-		if ( recursive ){
-			exitno = scan_dir (argv[0], argv[optind]);
+		if ( arg.recursive ){
+			exitno = scan_dir (argv[0], &arg, argv[optind]);
 		} else {
 			fprintf (stderr, "%s: omitting directory '%s'\n", argv[0], argv[optind]);
 			exitno = EXIT_FAILURE;
 		}
 	} else {
-		exitno = scan_file (argv[0], argv[optind]);
+		exitno = scan_file (argv[0], &arg, argv[optind]);
 	}
 
 	return exitno;
