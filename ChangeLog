@@ -4,6 +4,9 @@ version 1.2 - 2017-01-??
 * Print a category to which a file belongs to. This can be: 'data', 'key',
 'ciphertext', 'password'.
 
+* New option '-q' that treats no results as success by setting the exit status
+to 0 instead of 2.
+
 version 1.1 - 2016-12-18
 ------------------------
 
