@@ -18,7 +18,9 @@
 #ifndef _TEST_ENTROPY_H
 #define _TEST_ENTROPY_H
 
-extern int testentropy_x2 (const char *file_path);
+#define TENTROPY_PRESERVE_ATIME 1
+
+extern int testentropy_x2 (const char *file_path, int flags);
 
 #endif
 

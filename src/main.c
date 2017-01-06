@@ -125,6 +125,7 @@ main (int argc, char *argv[])
 		goto cleanup;
 	}
 
+	// Setup the flags for testmagic_init
 	c = TESTMAGIC_FLAGS;
 
 	if ( arg.noatime )
@@ -152,6 +153,12 @@ main (int argc, char *argv[])
 
 	has_file = 0;
 
+	// Setup the flags for testentropy_x2
+	c = 0;
+
+	if ( arg.noatime )
+		c |= TENTROPY_PRESERVE_ATIME;
+
 	while ( ((fts_ent = fts_read (fts_p)) != NULL) && !sig_int ){
 		switch ( fts_ent->fts_info ){
 
@@ -173,7 +180,7 @@ main (int argc, char *argv[])
 					goto test_success;
 				}
 
-				test_res = testentropy_x2 (fts_ent->fts_path);
+				test_res = testentropy_x2 (fts_ent->fts_path, c);
 
 				if ( test_res == -1 ){
 					fprintf (stderr, "%s: '%s': %s\n", argv[0], fts_ent->fts_path, strerror (errno));

@@ -17,10 +17,13 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <limits.h>
+#include <utime.h>
 #include <errno.h>
 #include <math.h>
-#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "test_entropy.h"
 
@@ -132,14 +135,24 @@ map_char_counts (const unsigned char *buff, size_t buff_len, size_t array_cnt[X2
 }
 
 int
-testentropy_x2 (const char *file_path)
+testentropy_x2 (const char *file_path, int flags)
 {
 	FILE *file;
-	size_t buff_len, /*file_len,*/ char_map[X2_POSSIBILITIES];
+	struct stat fstat;
+	struct utimbuf timebuff;
+	size_t buff_len, char_map[X2_POSSIBILITIES];
 	unsigned char buff[X2_SAMPLE_LEN];
 	const struct chidist_freqmodel *model;
 	double expected_freq, chi;
-	int i;
+	int i, errflag;
+
+	if ( flags & TENTROPY_PRESERVE_ATIME ){
+		if ( stat (file_path, &fstat) == -1 )
+			return -1;
+
+		timebuff.actime = fstat.st_atim.tv_sec;
+		timebuff.modtime = fstat.st_mtim.tv_sec;
+	}
 
 	file = fopen (file_path, "rb");
 
@@ -149,28 +162,19 @@ testentropy_x2 (const char *file_path)
 		return -1;
 	}
 
-	/*if ( fseek (file, 0, SEEK_END) == -1 ){
-		fclose (file);
-		return -1;
-	}
-
-	file_len = ftell (file);
-
-	if ( file_len == -1 ){
-		fclose (file);
-		return -1;
-	}
-
-	rewind (file);*/
-
+	errflag = 0;
 	buff_len = fread (buff, 1, sizeof (buff), file);
 
-	if ( ferror (file) != 0 ){
-		fclose (file);
-		return -1;
-	}
+	if ( ferror (file) != 0 )
+		errflag = 1;
 
 	fclose (file);
+
+	if ( flags & TENTROPY_PRESERVE_ATIME )
+		utime (file_path, &timebuff);
+
+	if ( errflag )
+		return -1;
 
 	expected_freq = (buff_len * 1.0) / (X2_POSSIBILITIES * 1.0);
 	chi = 0.0;
