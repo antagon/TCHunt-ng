@@ -21,12 +21,10 @@
 #include <errno.h>
 #include <getopt.h>
 #include <signal.h>
-#include <sys/stat.h>
-#include <sys/types.h>
+#include <fts.h>
 #include <magic.h>
 #include <unistd.h>
 
-#include "strolldir.h"
 #include "test_magic.h"
 #include "test_chidist.h"
 
@@ -43,24 +41,28 @@ static struct args
 	int recursive;
 	int quiet;
 	int noatime;
+	int onefs;
 } arg;
 
 static int sig_int = 0;
+static int exitno = EXIT_SUCCESS;
 
 static void
 interrupt (int signo)
 {
 	sig_int = signo;
+	exitno = EXIT_SIGNAL;
 	signal (signo, SIG_DFL);
 }
 
 static void
 usage (const char *p)
 {
-	fprintf (stdout, "Usage: %s [options] <file>\n\n\
+	fprintf (stdout, "Usage: %s [options] <file>[ ...]\n\n\
 Options:\n\
  -r  recursively traverse a directory\n\
  -q  quietly treat no results as success\n\
+ -x  don't cross filesystem boundaries\n\
  -p  preserve access time of files analyzed\n\
  -v  show version information\n", p);
 }
@@ -71,175 +73,24 @@ version_info (void)
 	fprintf (stdout, "TCHunt-ng %s\n", TCHUNTNG_VERSION);
 }
 
-static int
-scan_dir (const char *p, struct args *arg, const char *dirname)
-{
-	stroller_t dir;
-	const char *cat;
-	struct file_list_path *path_iter;
-	const struct file_list *files;
-	struct testmagic testmagic;
-	int exitno, has_file;
-
-	exitno = EXIT_SUCCESS;
-	has_file = 0;
-
-	if ( strolldir_open (&dir, dirname) != 0 ){
-		fprintf (stderr, "%s: %s\n", p, strerror (errno));
-		exitno = EXIT_FAILURE;
-		goto cleanup;
-	}
-
-	if ( testmagic_init (&testmagic, TESTMAGIC_FLAGS) == -1 ){
-		fprintf (stderr, "%s: %s\n", p, testmagic_error (&testmagic));
-		exitno = EXIT_FAILURE;
-		goto cleanup;
-	}
-
-	do {
-		if ( strolldir_scan (&dir) != 0 ){
-			fprintf (stderr, "%s: '%s': %s\n", p, strolldir_getdir (&dir), strerror (errno));
-
-			// Terminate if the error is something severe rather than access
-			// permissions violation.
-			if ( errno != EACCES && errno != ENOENT ){
-				exitno = EXIT_FAILURE;
-				goto cleanup;
-			}
-		}
-
-		files = strolldir_getfiles (&dir);
-
-		for ( path_iter = files->head; path_iter != NULL && !sig_int; path_iter = path_iter->next ){
-
-			switch ( testmagic_test (&testmagic, path_iter->path, &cat) ){
-				case -1:
-					fprintf (stderr, "%s: '%s': %s\n", p, path_iter->path, testmagic_error (&testmagic));
-					exitno = EXIT_FAILURE;
-					goto cleanup;
-
-				case 0:
-					// Read a next file...
-					continue;
-
-				case TMAGIC_CAT_DATA:
-					// Follow up with other tests...
-					break;
-
-				default:
-					goto test_success;
-			}
-
-			switch ( testchidist_x2 (path_iter->path) ){
-				case -1:
-					fprintf (stderr, "%s: '%s': %s\n", p, path_iter->path, strerror (errno));
-					exitno = EXIT_FAILURE;
-					goto cleanup;
-
-				case 0:
-					// Read a next file...
-					continue;
-
-				case 1:
-					break;
-			}
-
-test_success:
-			has_file = 1;
-			fprintf (stdout, "%s [%s]\n", path_iter->path, cat);
-		}
-
-	} while ( strolldir_nextdir (&dir) && !sig_int );
-
-	if ( ! has_file ){
-		if ( ! arg->quiet )
-			exitno = EXIT_NOTFOUND;
-	}
-
-	if ( sig_int )
-		exitno = EXIT_SIGNAL;
-
-cleanup:
-	strolldir_close (&dir);
-	testmagic_free (&testmagic);
-
-	return exitno;
-}
-
-static int
-scan_file (const char *p, struct args *arg, const char *filename)
-{
-	struct testmagic testmagic;
-	const char *cat;
-	int exitno;
-
-	exitno = EXIT_SUCCESS;
-
-	if ( testmagic_init (&testmagic, TESTMAGIC_FLAGS) == -1 ){
-		fprintf (stderr, "%s: %s\n", p, testmagic_error (&testmagic));
-		exitno = EXIT_FAILURE;
-		goto cleanup;
-	}
-
-	switch ( testmagic_test (&testmagic, filename, &cat) ){
-		case -1:
-			fprintf (stderr, "%s: '%s': %s\n", p, filename, testmagic_error (&testmagic));
-			exitno = EXIT_FAILURE;
-			goto cleanup;
-
-		case 0:
-			exitno = EXIT_NOTFOUND;
-			goto cleanup;
-
-		case TMAGIC_CAT_DATA:
-			// Follow up with other tests...
-			break;
-
-		default:
-			goto test_success;
-	}
-
-	switch ( testchidist_x2 (filename) ){
-		case -1:
-			fprintf (stderr, "%s: '%s': %s\n", p, filename, strerror (errno));
-			exitno = EXIT_FAILURE;
-			goto cleanup;
-
-		case 0:
-			exitno = EXIT_NOTFOUND;
-			goto cleanup;
-
-		case 1:
-			break;
-	}
-
-test_success:
-	fprintf (stdout, "%s [%s]\n", filename, cat);
-
-cleanup:
-	testmagic_free (&testmagic);
-
-	if ( exitno == EXIT_NOTFOUND && arg->quiet )
-		exitno = EXIT_SUCCESS;
-	
-	return exitno;
-}
-
 int
 main (int argc, char *argv[])
 {
-	struct stat file_stat;
-	int exitno, c, is_dir;
+	FTS *fts_p;
+	FTSENT *fts_ent;
+	struct testmagic testmagic;
+	const char *cat;
+	int test_res, has_file, c;
 
-	exitno = EXIT_SUCCESS;
-	is_dir = 0;
+	fts_p = NULL;
 
 	memset (&arg, 0, sizeof (struct args));
+	memset (&testmagic, 0, sizeof (struct testmagic));
 
 	signal (SIGTERM, interrupt);
 	signal (SIGINT, interrupt);
 
-	while ( (c = getopt (argc, argv, "rqpv")) != -1 ){
+	while ( (c = getopt (argc, argv, "rqxpv")) != -1 ){
 		switch ( c ){
 			case 'r':
 				arg.recursive = 1;
@@ -247,6 +98,10 @@ main (int argc, char *argv[])
 
 			case 'q':
 				arg.quiet = 1;
+				break;
+
+			case 'x':
+				arg.onefs = 1;
 				break;
 
 			case 'p':
@@ -267,31 +122,112 @@ main (int argc, char *argv[])
 	if ( (argc - optind) == 0 ){
 		usage (argv[0]);
 		exitno = EXIT_FAILURE;
-		return exitno;
+		goto cleanup;
 	}
 
-	if ( stat (argv[optind], &file_stat) == -1 ){
-		fprintf (stderr, "%s: %s: %s\n", argv[0], argv[optind], strerror (errno));
+	if ( testmagic_init (&testmagic, TESTMAGIC_FLAGS) == -1 ){
+		fprintf (stderr, "%s: %s\n", argv[0], testmagic_error (&testmagic));
 		exitno = EXIT_FAILURE;
-		return exitno;
+		goto cleanup;
 	}
 
-	switch ( file_stat.st_mode & S_IFMT ){
-		case S_IFDIR:
-			is_dir = 1;
-			break;
+	// Setup the flags for fts_open
+	c = FTS_COMFOLLOW | FTS_PHYSICAL | FTS_NOSTAT;
+
+	if ( arg.onefs )
+		c |= FTS_XDEV;
+
+	fts_p = fts_open (argv + optind, c, NULL);
+
+	if ( fts_p == NULL ){
+		fprintf (stderr, "%s: %s\n", argv[0], strerror (errno));
+		exitno = EXIT_FAILURE;
+		goto cleanup;
 	}
 
-	if ( is_dir ){
-		if ( arg.recursive ){
-			exitno = scan_dir (argv[0], &arg, argv[optind]);
-		} else {
-			fprintf (stderr, "%s: omitting directory '%s'\n", argv[0], argv[optind]);
-			exitno = EXIT_FAILURE;
+	has_file = 0;
+
+	while ( ((fts_ent = fts_read (fts_p)) != NULL) && !sig_int ){
+		switch ( fts_ent->fts_info ){
+
+			/* Regular file */
+			case FTS_F:
+			case FTS_NSOK:
+				test_res = testmagic_test (&testmagic, fts_ent->fts_path, &cat);
+
+				if ( test_res == -1 ){
+					fprintf (stderr, "%s: '%s': %s\n", argv[0], fts_ent->fts_path, testmagic_error (&testmagic));
+					exitno = EXIT_FAILURE;
+					goto cleanup;
+				} else if ( test_res == 0 ){
+					/* Skip to next file */
+					continue;
+				} else if ( test_res == TMAGIC_CAT_DATA ){
+					/* It's data, follow up with other tests... */
+				} else {
+					goto test_success;
+				}
+
+				test_res = testchidist_x2 (fts_ent->fts_path);
+
+				if ( test_res == -1 ){
+					fprintf (stderr, "%s: '%s': %s\n", argv[0], fts_ent->fts_path, strerror (errno));
+					exitno = EXIT_FAILURE;
+					goto cleanup;
+				} else if ( test_res == 0 ){
+					/* Skip to next file */
+					continue;
+				} else {
+					/* It's a match... */
+				}
+
+test_success:
+				/* Print the filename out */
+				has_file = 1;
+				fprintf (stdout, "%s [%s]\n", fts_ent->fts_path, cat);
+				break;
+
+			/* Directory */
+			case FTS_D:
+				if ( ! arg.recursive ){
+					fprintf (stderr, "%s: omitting directory '%s'\n", argv[0], fts_ent->fts_path);
+					fts_set (fts_p, fts_ent, FTS_SKIP);
+				}
+				break;
+
+			/* Ignored cases */
+			case FTS_DP:
+			case FTS_DC:
+			case FTS_SL:
+			case FTS_SLNONE:
+			case FTS_DEFAULT:
+				break;
+
+			/* Error cases */
+			case FTS_NS:
+			case FTS_DNR:
+			case FTS_ERR:
+				fprintf (stderr, "%s: '%s': %s\n", argv[0], fts_ent->fts_path, strerror (fts_ent->fts_errno));
+				break;
+
+			default:
+				fprintf (stderr, "[?] %s\n", fts_ent->fts_path);
+				break;
 		}
-	} else {
-		exitno = scan_file (argv[0], &arg, argv[optind]);
 	}
+
+	if ( exitno != EXIT_SIGNAL && !has_file ){
+		if ( arg.quiet )
+			exitno = EXIT_SUCCESS;
+		else
+			exitno = EXIT_NOTFOUND;
+	}
+
+cleanup:
+	testmagic_free (&testmagic);
+
+	if ( fts_p != NULL )
+		fts_close (fts_p);
 
 	return exitno;
 }
