@@ -22,6 +22,8 @@
 #include <math.h>
 #include <string.h>
 
+#include "test_entropy.h"
+
 /*
  * Minimum value should correspond to the minimum non-zero value in the model
  * and vice-versa.
@@ -130,7 +132,7 @@ map_char_counts (const unsigned char *buff, size_t buff_len, size_t array_cnt[X2
 }
 
 int
-testchidist_x2 (const char *file_path)
+testentropy_x2 (const char *file_path)
 {
 	FILE *file;
 	size_t buff_len, /*file_len,*/ char_map[X2_POSSIBILITIES];

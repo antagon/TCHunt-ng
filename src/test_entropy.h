@@ -15,10 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TEST_CHIDIST_H
-#define _TEST_CHIDIST_H
+#ifndef _TEST_ENTROPY_H
+#define _TEST_ENTROPY_H
 
-extern int testchidist_x2 (const char *file_path);
+extern int testentropy_x2 (const char *file_path);
 
 #endif
 

@@ -16,7 +16,7 @@ uninstall:
 clean:
 	rm -f *.o $(TARGET)
 
-$(TARGET): main.o test_magic.o test_chidist.o
+$(TARGET): main.o test_magic.o test_entropy.o
 	$(CC) $(CFLAGS) $^ -o $(TARGET) -lmagic -lm
 
 main.o: main.c
@@ -25,6 +25,6 @@ main.o: main.c
 test_magic.o: test_magic.c
 	$(CC) $(CFLAGS) -c $<
 
-test_chidist.o: test_chidist.c
+test_entropy.o: test_entropy.c
 	$(CC) $(CFLAGS) -c $<
 

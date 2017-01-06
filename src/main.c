@@ -26,7 +26,7 @@
 #include <unistd.h>
 
 #include "test_magic.h"
-#include "test_chidist.h"
+#include "test_entropy.h"
 
 #define TCHUNTNG_VERSION "1.2"
 
@@ -168,7 +168,7 @@ main (int argc, char *argv[])
 					goto test_success;
 				}
 
-				test_res = testchidist_x2 (fts_ent->fts_path);
+				test_res = testentropy_x2 (fts_ent->fts_path);
 
 				if ( test_res == -1 ){
 					fprintf (stderr, "%s: '%s': %s\n", argv[0], fts_ent->fts_path, strerror (errno));
