@@ -24,7 +24,7 @@
 #include "test_magic.h"
 
 static const char *testmagic_cattype[_TMAGIC_CAT_EOF - 1] = {
-	"data", "ciphertext", "key", "password"
+	"data", "data", "key", "password"
 };
 
 int
