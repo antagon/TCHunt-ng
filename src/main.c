@@ -125,7 +125,12 @@ main (int argc, char *argv[])
 		goto cleanup;
 	}
 
-	if ( testmagic_init (&testmagic, TESTMAGIC_FLAGS) == -1 ){
+	c = TESTMAGIC_FLAGS;
+
+	if ( arg.noatime )
+		c |= MAGIC_PRESERVE_ATIME;
+
+	if ( testmagic_init (&testmagic, c) == -1 ){
 		fprintf (stderr, "%s: %s\n", argv[0], testmagic_error (&testmagic));
 		exitno = EXIT_FAILURE;
 		goto cleanup;
