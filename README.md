@@ -13,11 +13,14 @@ TCHunt-ng performs following tests against content of a file to determine if it 
 
 ## Usage
 
-    Usage: tchuntng [options] <file>
+	Usage: tchuntng [options] <file>[ ...]
 
-    Options:
-     -r  recursively traverse a directory
-     -v  show version information
+	Options:
+	 -r  recursively traverse a directory
+	 -q  quietly treat no results as success
+	 -x  don't cross filesystem boundaries
+	 -p  preserve access time of files analyzed
+	 -v  show version information
 
 ## Exit status
 
