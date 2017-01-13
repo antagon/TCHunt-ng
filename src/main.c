@@ -42,6 +42,8 @@ static struct args
 	int quiet;
 	int noatime;
 	int onefs;
+	int showclass;
+	int compatmode;
 } arg;
 
 static int sig_int = 0;
@@ -61,6 +63,8 @@ usage (const char *p)
 	fprintf (stdout, "Usage: %s [options] <file>[ ...]\n\n\
 Options:\n\
  -r  recursively traverse a directory\n\
+ -s  show a file's classification\n\
+ -T  enable TCHunt compatibility mode\n\
  -q  quietly treat no results as success\n\
  -x  don't cross filesystem boundaries\n\
  -p  preserve access time of files analyzed\n\
@@ -90,10 +94,18 @@ main (int argc, char *argv[])
 	signal (SIGTERM, interrupt);
 	signal (SIGINT, interrupt);
 
-	while ( (c = getopt (argc, argv, "rqxpv")) != -1 ){
+	while ( (c = getopt (argc, argv, "rsTqxpv")) != -1 ){
 		switch ( c ){
 			case 'r':
 				arg.recursive = 1;
+				break;
+
+			case 's':
+				arg.showclass = 1;
+				break;
+
+			case 'T':
+				arg.compatmode = 1;
 				break;
 
 			case 'q':
@@ -158,6 +170,8 @@ main (int argc, char *argv[])
 
 	if ( arg.noatime )
 		c |= TENTROPY_PRESERVE_ATIME;
+	if ( arg.compatmode )
+		c |= TENTROPY_TEST_FILESIZE;
 
 	while ( ((fts_ent = fts_read (fts_p)) != NULL) && !sig_int ){
 		switch ( fts_ent->fts_info ){
@@ -177,7 +191,11 @@ main (int argc, char *argv[])
 				} else if ( test_res == TMAGIC_CAT_DATA ){
 					/* It's data, follow up with other tests... */
 				} else {
-					goto test_success;
+					/* It's a class recognized by TCHunt-ng, it's a match!
+					 * Unless... we are running in the compatibility mode.
+					 */
+					if ( ! arg.compatmode )
+						goto test_success;
 				}
 
 				test_res = testentropy_x2 (fts_ent->fts_path, c);
@@ -196,7 +214,11 @@ main (int argc, char *argv[])
 test_success:
 				/* Print the filename out */
 				has_file = 1;
-				fprintf (stdout, "%s [%s]\n", fts_ent->fts_path, cat);
+
+				if ( arg.showclass )
+					fprintf (stdout, "%s [%s]\n", fts_ent->fts_path, cat);
+				else
+					fprintf (stdout, "%s\n", fts_ent->fts_path);
 				break;
 
 			/* Directory */
