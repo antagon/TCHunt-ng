@@ -1,18 +1,22 @@
 version 1.2 - 2017-01-??
 ------------------------
 
-* Print a category to which a file belongs to. This can be: 'data', 'key',
-'password'.
-
-* New option '-q' that treats no results as success by setting the exit status
-to 0 instead of 2.
-
 * Accept multiple files specified on a command line.
 
-* New option '-p' to preserve last access time of a file.
+* New option '-T' to toggle the TCHunt compatibility mode. In this mode a
+file's size is checked to be modulo of 512 and greater than 19kiB.
 
-* New option '-x' to stay on the same device as a file from which a descent
-began.
+* New option '-s' to show a class to which a matching file belongs to. This
+can be: 'data', 'key', 'password'.
+
+* New option '-q' that treats no results as success. The program terminates
+with exit status equal to 0 instead of 2.
+
+* New option '-p' to preserve last access time of a file analyzed.
+
+* New option '-x' to stay on the same device as the file from which a descent
+began. This option only makes sense when recursively scanning a directory
+(option '-r').
 
 version 1.1 - 2016-12-18
 ------------------------
