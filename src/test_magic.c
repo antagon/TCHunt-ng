@@ -15,7 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#if 0
 #include <stdio.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <magic.h>
@@ -30,12 +32,19 @@ static const char *testmagic_cattype[_TMAGIC_CAT_EOF - 1] = {
 int
 testmagic_init (struct testmagic *testmagic, int flags)
 {
+	size_t val;
+
 	testmagic->magic_res = magic_open (flags);
 
 	if ( testmagic->magic_res == NULL )
 		return -1;
 
 	if ( magic_load (testmagic->magic_res, NULL) == -1 )
+		return -1;
+
+	val = 99;
+
+	if ( magic_setparam (testmagic->magic_res, MAGIC_PARAM_NAME_MAX, &val) == -1 )
 		return -1;
 
 	return 0;
