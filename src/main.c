@@ -150,7 +150,7 @@ main (int argc, char *argv[])
 	}
 
 	// Setup the flags for fts_open
-	c = FTS_COMFOLLOW | FTS_PHYSICAL | FTS_NOSTAT;
+	c = FTS_COMFOLLOW | FTS_LOGICAL | FTS_NOSTAT;
 
 	if ( arg.onefs )
 		c |= FTS_XDEV;
