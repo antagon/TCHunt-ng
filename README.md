@@ -9,7 +9,8 @@ TCHunt-ng is a free software licensed under **GPLv3**.
 TCHunt-ng performs following tests against content of a file to determine if it is encrypted:
 
 1. Test against a database of well known file-types provided by *libmagic*.
-2. *Chi-squared test*.
+2. Size of analyzed file has to greater than 19 kiB and of modulo 512. This test is only enabled in *TCHunt* compatibility mode.
+3. *Chi-squared test*.
 
 ## Usage
 
@@ -54,4 +55,6 @@ https://github.com/stephenjudge/TCHunt
 https://github.com/file/file
 
 https://en.wikipedia.org/wiki/Chi-squared_test
+
+http://forensicswiki.org/wiki/TrueCrypt#Detection
 
