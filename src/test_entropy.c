@@ -146,12 +146,28 @@ testentropy_x2 (const char *file_path, int flags)
 	double expected_freq, chi;
 	int i, errflag;
 
-	if ( flags & TENTROPY_PRESERVE_ATIME ){
+	if ( (flags & TENTROPY_PRESERVE_ATIME) || (flags & TENTROPY_TEST_FILESIZE) ){
 		if ( stat (file_path, &fstat) == -1 )
 			return -1;
 
 		timebuff.actime = fstat.st_atim.tv_sec;
 		timebuff.modtime = fstat.st_mtim.tv_sec;
+
+		if ( flags & TENTROPY_TEST_FILESIZE ){
+			if ( fstat.st_size < 19456 ){
+#if 0
+				fprintf (stderr, "\e[31m%s: %zu <19kiB (TENTROPY_TEST_FILESIZE in effect)\e[0m\n", file_path, fstat.st_size);
+#endif
+				return 0;
+			}
+
+			if ( (fstat.st_size % 512) != 0 ){
+#if 0
+				fprintf (stderr, "\e[31m%s: %zu != mod 512 (TENTROPY_TEST_FILESIZE in effect)\e[0m\n", file_path, fstat.st_size);
+#endif
+				return 0;
+			}
+		}
 	}
 
 	file = fopen (file_path, "rb");
@@ -170,6 +186,13 @@ testentropy_x2 (const char *file_path, int flags)
 
 	fclose (file);
 
+	/* XXX
+	 * Make sure this condition always precedes the errflag check below!
+	 * This is because fopen(3) modifies atime and we want to make sure it is
+	 * set back to its original value before the function terminates in case of
+	 * fread(3) error.
+	 * XXX
+	 */
 	if ( flags & TENTROPY_PRESERVE_ATIME )
 		utime (file_path, &timebuff);
 
