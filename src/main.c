@@ -60,7 +60,7 @@ interrupt (int signo)
 static void
 usage (const char *p)
 {
-	fprintf (stdout, "Usage: %s [options] <file>[ ...]\n\n\
+	fprintf (stdout, "Usage: %s [options] <file>...\n\n\
 Options:\n\
  -r  recursively traverse a directory\n\
  -s  show a file's classification\n\
