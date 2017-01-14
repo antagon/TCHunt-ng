@@ -1,9 +1,9 @@
 CFLAGS = -std=gnu99 -O2 -pedantic -Wall -ggdb
 
 TARGET = tchuntng
-INSTALL_DIR = /usr/local/sbin
+INSTALL_DIR = /usr/local/bin
 
-.PHONY: clean install
+.PHONY: clean install uninstall
 
 all: $(TARGET)
 

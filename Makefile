@@ -1,3 +1,5 @@
+.PHONY: clean install uninstall
+
 all:
 	$(MAKE) -C src/
 
