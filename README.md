@@ -42,17 +42,15 @@ TCHunt-ng exits with one of the following exit codes:
 
 ## Installation
 
-Install the software dependencies:
-
 On Ubuntu:
 
-`sudo apt-get install libmagic-dev`
+	sudo apt-get install libmagic-dev
 
 On Fedora:
 
-`sudo dnf install file-devel`
+	sudo dnf install file-devel
 
-Compile the source code and install the binary:
+Compile the source code and install the executable:
 
 `make && sudo make install`
 

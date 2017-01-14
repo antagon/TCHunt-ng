@@ -18,6 +18,9 @@ with exit status equal to 0 instead of 2.
 began. This option only makes sense when recursively scanning a directory
 (option '-r').
 
+* Do not install the executable into '/usr/local/sbin', use '/usr/local/bin'
+instead.
+
 version 1.1 - 2016-12-18
 ------------------------
 
