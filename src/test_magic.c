@@ -32,8 +32,6 @@ static const char *testmagic_cattype[_TMAGIC_CAT_EOF - 1] = {
 int
 testmagic_init (struct testmagic *testmagic, int flags)
 {
-	size_t val;
-
 	testmagic->magic_res = magic_open (flags);
 
 	if ( testmagic->magic_res == NULL )
@@ -42,10 +40,17 @@ testmagic_init (struct testmagic *testmagic, int flags)
 	if ( magic_load (testmagic->magic_res, NULL) == -1 )
 		return -1;
 
+
+#ifdef MAGIC_PARAM_NAME_MAX
+	/* Increate the default value as some files fail to be checked
+	 * successfully. */
+	size_t val;
+
 	val = 99;
 
 	if ( magic_setparam (testmagic->magic_res, MAGIC_PARAM_NAME_MAX, &val) == -1 )
 		return -1;
+#endif
 
 	return 0;
 }
