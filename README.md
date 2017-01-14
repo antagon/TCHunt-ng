@@ -9,7 +9,7 @@ TCHunt-ng is a free software licensed under **GPLv3**.
 TCHunt-ng performs following tests against content of a file to determine if it is of interest:
 
 1. Test against a database of well known file-types provided by *libmagic*.
-2. Test the size of a file to be greater than 19 kiB and of modulo 512. This test is only enabled in *TCHunt compatibility mode*.
+2. Test the size of a file to be greater than 19 kiB and of modulo 512. The test is performed only in *TCHunt compatibility mode*.
 3. *Chi-squared test*.
 
 ## Usage
@@ -34,13 +34,25 @@ TCHunt-ng exits with one of the following exit codes:
 * `2` - content of a file is not encrypted / no encrypted files were found.
 * `3` - interrupted by a signal.
 
-## Requirements
+## Dependencies
 
 * libmagic >= 5.0
 
 * glibc >= 2.0
 
 ## Installation
+
+Install the software dependencies:
+
+On Ubuntu:
+
+`sudo apt-get install libmagic-dev`
+
+On Fedora:
+
+`sudo dnf install file-devel`
+
+Compile the source code and install the binary:
 
 `make && sudo make install`
 

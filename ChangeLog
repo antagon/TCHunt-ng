@@ -1,13 +1,13 @@
-version 1.2 - 2017-01-??
+version 1.2 - 2017-01-14
 ------------------------
 
 * Accept multiple files specified on a command line.
 
 * New option '-T' to toggle the TCHunt compatibility mode. In this mode a
-file's size is checked to be modulo of 512 and greater than 19kiB.
+file's size is checked to be greater than 19 kiB and of modulo 512.
 
 * New option '-s' to show a class to which a matching file belongs to. This
-can be: 'data', 'key', 'password'.
+can be one of the following: 'data', 'key', 'password'.
 
 * New option '-q' that treats no results as success. The program terminates
 with exit status equal to 0 instead of 2.
