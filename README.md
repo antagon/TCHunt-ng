@@ -14,7 +14,7 @@ TCHunt-ng performs following tests against content of a file to determine if it 
 
 ## Usage
 
-	Usage: tchuntng [options] <file>[ ...]
+	Usage: tchuntng [options] <file>...
 
 	Options:
 	 -r  recursively traverse a directory
@@ -52,7 +52,7 @@ On Fedora:
 
 Compile the source code and install the executable:
 
-`make && sudo make install`
+	make && sudo make install
 
 ## Limitations
 
