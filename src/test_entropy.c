@@ -53,7 +53,7 @@ static struct chidist_freqmodel chidist_model[] = {
 	 * cannot be >0. Empty files will not pass the test.
 	 */
 	{ 0, 1.0, 1.0 },
-	{ 32, 196.000000, 610.750000 },
+	{ 32, 196.000000, 626.625000 },
 	{ 64, 144.000000, 500.000000 },
 	{ 128, 85.000000, 389.249832 },
 	{ 256, 76.000000, 343.000000 },
