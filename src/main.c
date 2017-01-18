@@ -28,7 +28,7 @@
 #include "test_magic.h"
 #include "test_entropy.h"
 
-#define TCHUNTNG_VERSION "1.2"
+#define TCHUNTNG_VERSION "1.3"
 
 enum
 {
