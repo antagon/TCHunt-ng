@@ -25,6 +25,12 @@ TCHunt-ng performs following tests against content of a file to determine if it 
 	 -p  preserve access time of files analyzed
 	 -v  show version information
 
+## Environment
+
+The behavior of TCHunt-ng is affected by the following environment variables.
+
+The environment variable MAGIC can be be used to override default magic file name. Please note that doing so may affect other programs that rely on *libmagic*.
+
 ## Exit status
 
 TCHunt-ng exits with one of the following exit codes:
