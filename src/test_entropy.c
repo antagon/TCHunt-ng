@@ -70,13 +70,10 @@ derive_closest (double num)
 {
 	double res;
 
-	if ( num == 0 )
-		return 0;
-
 	res = pow (2, round (log2 (num)));
 
 	if ( res < CHDMODEL_MINLEN )
-		return CHDMODEL_MINLEN;
+		return 0;
 
 	if ( res > CHDMODEL_MAXLEN )
 		return CHDMODEL_MAXLEN;
@@ -116,7 +113,7 @@ chidist_freqmodel_lookup_closest (size_t data_len)
 	return &(chidist_model[(size_t) model_idx]);
 }
 
-#define X2_SAMPLE_LEN 16384
+#define X2_SAMPLE_LEN (CHDMODEL_MAXLEN)
 #define X2_POSSIBILITIES 256
 
 static void
@@ -133,6 +130,9 @@ map_char_counts (const unsigned char *buff, size_t buff_len, size_t array_cnt[X2
 		array_cnt[byte_val] += 1;
 	}
 }
+
+/* Minimal size of a TrueCrypt file. */
+#define TCRYPT_SIZE_MIN 19456
 
 int
 testentropy_x2 (const char *file_path, int flags)
@@ -154,7 +154,7 @@ testentropy_x2 (const char *file_path, int flags)
 		timebuff.modtime = fstat.st_mtim.tv_sec;
 
 		if ( flags & TENTROPY_TEST_FILESIZE ){
-			if ( fstat.st_size < 19456 ){
+			if ( fstat.st_size < TCRYPT_SIZE_MIN ){
 #if 0
 				fprintf (stderr, "\e[31m%s: %zu <19kiB (TENTROPY_TEST_FILESIZE in effect)\e[0m\n", file_path, fstat.st_size);
 #endif
