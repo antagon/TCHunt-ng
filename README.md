@@ -1,6 +1,6 @@
 # TCHunt-ng
 
-TCHunt-ng attempts to reveal encrypted files stored on a filesystem. The program is successful in finding **TrueCrypt**, **VeraCrypt**, **CipherShed** containers; **LUKS**, **EncFS**, **PGP/GPG** encrypted files; **OpenSSH** and **PEM** private keys; password databases; files made up of random data. The code is based on ideas laid out in the project of *Stephen Judge* named *TCHunt*, hence the name. The original code has aged badly, having unnecessary dependencies and unfixed bugs. A rewrite seemed like a good idea.
+TCHunt-ng attempts to reveal encrypted files stored on a filesystem. The program is successful in finding ***TrueCrypt***, ***VeraCrypt***, ***CipherShed*** containers; ***LUKS***, ***EncFS***, ***PGP/GPG*** encrypted files; ***OpenSSH*** and ***PEM*** private keys; password databases; files made up of random data. The code is based on ideas laid out in the project of *Stephen Judge* named *TCHunt*, hence the name. The original code has aged badly, having unnecessary dependencies and unfixed bugs. A rewrite seemed like a good idea.
 
 TCHunt-ng is a free software licensed under **GPLv3**.
 
@@ -17,19 +17,20 @@ TCHunt-ng performs following tests against content of a file to determine if it 
 	Usage: tchuntng [options] <file>...
 
 	Options:
+	 -p  preserve access time of files analyzed
+	 -q  quietly treat no results as success
 	 -r  recursively traverse a directory
 	 -s  show a file's classification
 	 -T  enable TCHunt compatibility mode
-	 -q  quietly treat no results as success
 	 -x  don't cross filesystem boundaries
-	 -p  preserve access time of files analyzed
+	 -z  look inside compressed files
 	 -v  show version information
 
 ## Environment
 
 The behavior of TCHunt-ng is affected by the following environment variables.
 
-The environment variable MAGIC can be be used to override default magic file name. Please note that doing so may affect other programs that rely on *libmagic*.
+The environment variable MAGIC can be used to override default magic file name. Please note that doing so may affect other programs that rely on *libmagic*.
 
 ## Exit status
 
