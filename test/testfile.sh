@@ -1,6 +1,13 @@
 TESTFILE_MATCH=0
 TESTFILE_NOMATCH=2
 
+TCHUNTNG_BIN="../src/tchuntng"
+
+function testfile_version ()
+{
+	"$TCHUNTNG_BIN" -v
+}
+
 function testfile ()
 {
 	memo="$1"
@@ -8,7 +15,7 @@ function testfile ()
 
 	echo -ne "$memo"
 
-	execprog tchuntng ${@:3} 1>/dev/null
+	execprog "$TCHUNTNG_BIN" ${@:3} 1>/dev/null
 
 	status=$?
 
