@@ -1,4 +1,4 @@
-.PHONY: clean install uninstall
+.PHONY: clean install uninstall test
 
 all:
 	$(MAKE) -C src/
@@ -11,4 +11,7 @@ uninstall:
 
 clean:
 	$(MAKE) -C src/ $@
+
+test:
+	$(MAKE) -C test/ $@
 
