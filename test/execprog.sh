@@ -3,10 +3,10 @@ function execprog ()
 	p="$(which "$1" 2>/dev/null)"
 
 	if [ ! -x "$p" ]; then
-		echo "$0: no executable file for '$1'"
+		(>&2 echo "no executable file '$1'")
 		exit 1
 	fi
 
-	$p ${@:2}
+	"$p" ${@:2}
 }
 
