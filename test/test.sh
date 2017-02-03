@@ -30,6 +30,8 @@ if [ ! -d "$outdir" ]; then
 	mkdir -p "$outdir"
 fi
 
+echo -n "Using " && testfile_version
+
 genfile "Generating a plain text file '$plain_name' ..." "plaintext" "$plain_name" "There is no perfection only life."
 
 # TODO: store random generated filenames in array.
