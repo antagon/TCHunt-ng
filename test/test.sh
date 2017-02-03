@@ -15,11 +15,13 @@ pgpseckey_name="$outdir/gpg_secretkey"
 
 function cleanup ()
 {
-	echo "Cleaning up..."
+	echo -ne "Cleaning up ..."
 
 	rm -f "$plain_name"\
 		"$luks_name"\
 		${rand_names[*]}
+
+	echo " [DONE]"
 }
 
 trap cleanup EXIT
@@ -31,12 +33,12 @@ fi
 genfile "Generating a plain text file '$plain_name' ..." "plaintext" "$plain_name" "There is no perfection only life."
 
 # TODO: store random generated filenames in array.
-for i in $(seq 1 14); do
+for i in $(seq 5 14); do
 	tmpname="$(mktemp -p "$outdir")"
-        rand_names+=("$tmpname")
+	rand_names+=("$tmpname")
 	size="$(echo "2 ^ $i" | bc)"
 
-	genfile "Generating a random file '$tmpname' ..." "random" "$tmpname" "$size" 2>/dev/null
+	genfile "Generating a random file '$tmpname' ($size B) ..." "random" "$tmpname" "$size" 2>/dev/null
 done
 
 genfile "Generating a LUKS container '$luks_name' ..." "luks" "$luks_name" "14"
