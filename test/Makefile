@@ -50,7 +50,7 @@ DELETEME_FILES=$(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)\
 				$(VCCONTAINER_FILE) $(AESENCARMOR_FILE) $(AESENCRAW_FILE)\
 				$(CCRYPT_FILE)
 
-.PHONY: test generate clean $(addprefix test_, $(TESTME_FILES))
+.PHONY: all test generate clean $(addprefix test_, $(TESTME_FILES))
 
 all: generate test
 
