@@ -102,6 +102,7 @@ test_$(BCRYPTNCOMPR_FILE):
 
 test_$(VCCONTAINER_FILE):
 	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' ... " 0 -p "$(VCCONTAINER_FILE)"
+	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' (TCHunt compatibility mode) ... " 0 -pT "$(VCCONTAINER_FILE)"
 
 clean:
 	@rm -f $(DELETEME_FILES)
