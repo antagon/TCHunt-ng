@@ -34,18 +34,21 @@ BCRYPTNCOMPR_FILE=$(PLAINTEXT_FILE)-nocompr.bfe
 VCCONTAINER_FILE=$(SAMPLES_DIR)/vera_container.hc
 AESENCARMOR_FILE=$(SAMPLES_DIR)/message.txt.aes-armored.enc
 AESENCRAW_FILE=$(SAMPLES_DIR)/message.txt.aes.enc
+CCRYPT_FILE=$(PLAINTEXT_FILE).cpt
 
 GENERATEME_FILES=$(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)\
-					$(VCCONTAINER_FILE) $(AESENCARMOR_FILE) $(AESENCRAW_FILE)
+					$(VCCONTAINER_FILE) $(AESENCARMOR_FILE) $(AESENCRAW_FILE)\
+					$(CCRYPT_FILE)
 
 TESTME_FILES=$(PUBKEYARMOR_FILE) $(PUBKEYRAW_FILE) $(SECKEYARMOR_FILE)\
 				$(SECKEYRAW_FILE) $(PLAINTEXT_FILE) $(GPGMSGARMOR_FILE)\
 				$(GPGMSGRAW_FILE) $(LUKS_FILE) $(BCRYPT_FILE)\
 				$(BCRYPTNCOMPR_FILE) $(VCCONTAINER_FILE) $(AESENCARMOR_FILE)\
-				$(AESENCRAW_FILE)
+				$(AESENCRAW_FILE) $(CCRYPT_FILE)
 
 DELETEME_FILES=$(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)\
-				$(VCCONTAINER_FILE) $(AESENCARMOR_FILE) $(AESENCRAW_FILE)
+				$(VCCONTAINER_FILE) $(AESENCARMOR_FILE) $(AESENCRAW_FILE)\
+				$(CCRYPT_FILE)
 
 .PHONY: test generate clean $(addprefix test_, $(TESTME_FILES))
 
@@ -57,7 +60,7 @@ all: generate test
 generate: $(GENERATEME_FILES)
 
 $(LUKS_FILE):
-	@$(RUN) genfile.sh "Generating '$@' ..." "luks" "$@" "8"
+	@$(RUN) genfile.sh "Generating '$@' ..." "luks" "$@" "4"
 
 $(BCRYPT_FILE):
 	@$(RUN) encfile.sh "Generating '$@' ..." "bcrypt" "$(PLAINTEXT_FILE)" "$@" 2>/dev/null
@@ -73,6 +76,9 @@ $(AESENCARMOR_FILE):
 
 $(AESENCRAW_FILE):
 	@$(RUN) encfile.sh "Generating '$@' ..." "openssl" "$(PLAINTEXT_FILE)" "$@" "aes-256-cbc"
+
+$(CCRYPT_FILE):
+	@$(RUN) encfile.sh "Generating '$@' ..." "ccrypt" "$(PLAINTEXT_FILE)" "$@"
 
 #
 # File testers
@@ -118,6 +124,9 @@ test_$(AESENCARMOR_FILE):
 
 test_$(AESENCRAW_FILE):
 	@$(RUN) testfile.sh "Testing '$(AESENCRAW_FILE)' ... " 0 -p "$(AESENCRAW_FILE)"
+
+test_$(CCRYPT_FILE):
+	@$(RUN) testfile.sh "Testing '$(CCRYPT_FILE)' ... " 0 -p "$(CCRYPT_FILE)"
 
 clean:
 	@rm -f $(DELETEME_FILES)
