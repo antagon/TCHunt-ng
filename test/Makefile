@@ -32,17 +32,20 @@ LUKS_FILE=$(SAMPLES_DIR)/luks_container.dat
 BCRYPT_FILE=$(PLAINTEXT_FILE).bfe
 BCRYPTNCOMPR_FILE=$(PLAINTEXT_FILE)-nocompr.bfe
 VCCONTAINER_FILE=$(SAMPLES_DIR)/vera_container.hc
+AESENCARMOR_FILE=$(SAMPLES_DIR)/message.txt.aes-armored.enc
+AESENCRAW_FILE=$(SAMPLES_DIR)/message.txt.aes.enc
 
 GENERATEME_FILES=$(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)\
-					$(VCCONTAINER_FILE)
+					$(VCCONTAINER_FILE) $(AESENCARMOR_FILE) $(AESENCRAW_FILE)
 
 TESTME_FILES=$(PUBKEYARMOR_FILE) $(PUBKEYRAW_FILE) $(SECKEYARMOR_FILE)\
 				$(SECKEYRAW_FILE) $(PLAINTEXT_FILE) $(GPGMSGARMOR_FILE)\
 				$(GPGMSGRAW_FILE) $(LUKS_FILE) $(BCRYPT_FILE)\
-				$(BCRYPTNCOMPR_FILE) $(VCCONTAINER_FILE)
+				$(BCRYPTNCOMPR_FILE) $(VCCONTAINER_FILE) $(AESENCARMOR_FILE)\
+				$(AESENCRAW_FILE)
 
 DELETEME_FILES=$(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)\
-				$(VCCONTAINER_FILE)
+				$(VCCONTAINER_FILE) $(AESENCARMOR_FILE) $(AESENCRAW_FILE)
 
 .PHONY: test generate clean $(addprefix test_, $(TESTME_FILES))
 
@@ -65,6 +68,12 @@ $(BCRYPTNCOMPR_FILE):
 $(VCCONTAINER_FILE):
 	@$(RUN) genfile.sh "Generating '$@' ..." "veracrypt" "$@" "4"
 
+$(AESENCARMOR_FILE):
+	@$(RUN) encfile.sh "Generating '$@' ..." "openssl" "$(PLAINTEXT_FILE)" "$@" "aes-256-cbc" true
+
+$(AESENCRAW_FILE):
+	@$(RUN) encfile.sh "Generating '$@' ..." "openssl" "$(PLAINTEXT_FILE)" "$@" "aes-256-cbc"
+
 #
 # File testers
 #
@@ -86,7 +95,7 @@ test_$(SECKEYRAW_FILE):
 	@$(RUN) testfile.sh "Testing '$(SECKEYRAW_FILE)' ... " 0 -p "$(SECKEYRAW_FILE)"
 
 test_$(PLAINTEXT_FILE):
-	@$(RUN) testfile.sh "Testing '$(PLAINTEXT_FILE)' ... " 0 -p "$(PLAINTEXT_FILE)"
+	@$(RUN) testfile.sh "Testing '$(PLAINTEXT_FILE)' ... " 2 -p "$(PLAINTEXT_FILE)"
 
 test_$(GPGMSGARMOR_FILE):
 	@$(RUN) testfile.sh "Testing '$(GPGMSGARMOR_FILE)' ... " 0 -p "$(GPGMSGARMOR_FILE)"
@@ -103,6 +112,12 @@ test_$(BCRYPTNCOMPR_FILE):
 test_$(VCCONTAINER_FILE):
 	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' ... " 0 -p "$(VCCONTAINER_FILE)"
 	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' (TCHunt compatibility mode) ... " 0 -pT "$(VCCONTAINER_FILE)"
+
+test_$(AESENCARMOR_FILE):
+	@$(RUN) testfile.sh "Testing '$(AESENCARMOR_FILE)' ... " 0 -p "$(AESENCARMOR_FILE)"
+
+test_$(AESENCRAW_FILE):
+	@$(RUN) testfile.sh "Testing '$(AESENCRAW_FILE)' ... " 0 -p "$(AESENCRAW_FILE)"
 
 clean:
 	@rm -f $(DELETEME_FILES)
