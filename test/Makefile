@@ -1,3 +1,20 @@
+#
+# TCHunt-ng - reveal (possibly) encrypted files stored on a filesystem.
+# Copyright (C) 2016, 2017  CodeWard.org
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 RUN=bash
 SAMPLES_DIR=./samples
 
@@ -14,13 +31,18 @@ GPGMSGRAW_FILE=$(SAMPLES_DIR)/message.txt.gpg
 LUKS_FILE=$(SAMPLES_DIR)/luks_container.dat
 BCRYPT_FILE=$(PLAINTEXT_FILE).bfe
 BCRYPTNCOMPR_FILE=$(PLAINTEXT_FILE)-nocompr.bfe
+VCCONTAINER_FILE=$(SAMPLES_DIR)/vera_container.hc
+
+GENERATEME_FILES=$(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)\
+					$(VCCONTAINER_FILE)
 
 TESTME_FILES=$(PUBKEYARMOR_FILE) $(PUBKEYRAW_FILE) $(SECKEYARMOR_FILE)\
 				$(SECKEYRAW_FILE) $(PLAINTEXT_FILE) $(GPGMSGARMOR_FILE)\
 				$(GPGMSGRAW_FILE) $(LUKS_FILE) $(BCRYPT_FILE)\
-				$(BCRYPTNCOMPR_FILE)
+				$(BCRYPTNCOMPR_FILE) $(VCCONTAINER_FILE)
 
-DELETEME_FILES=$(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)
+DELETEME_FILES=$(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)\
+				$(VCCONTAINER_FILE)
 
 .PHONY: test generate clean $(addprefix test_, $(TESTME_FILES))
 
@@ -29,7 +51,7 @@ all: generate test
 #
 # File generators
 #
-generate: $(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)
+generate: $(GENERATEME_FILES)
 
 $(LUKS_FILE):
 	@$(RUN) genfile.sh "Generating '$@' ..." "luks" "$@" "8"
@@ -39,6 +61,9 @@ $(BCRYPT_FILE):
 
 $(BCRYPTNCOMPR_FILE):
 	@$(RUN) encfile.sh "Generating '$@' ..." "bcrypt" "$(PLAINTEXT_FILE)" "$@" true 2>/dev/null
+
+$(VCCONTAINER_FILE):
+	@$(RUN) genfile.sh "Generating '$@' ..." "veracrypt" "$@" "4"
 
 #
 # File testers
@@ -75,6 +100,9 @@ test_$(BCRYPT_FILE):
 test_$(BCRYPTNCOMPR_FILE):
 	@$(RUN) testfile.sh "Testing '$(BCRYPTNCOMPR_FILE)' ... " 0 -p "$(BCRYPTNCOMPR_FILE)"
 
+test_$(VCCONTAINER_FILE):
+	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' ... " 0 -p "$(VCCONTAINER_FILE)"
+
 clean:
-	rm -f $(DELETEME_FILES)
+	@rm -f $(DELETEME_FILES)
 
