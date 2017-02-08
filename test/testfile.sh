@@ -1,5 +1,4 @@
-TESTFILE_MATCH=0
-TESTFILE_NOMATCH=2
+source execprog.sh
 
 TCHUNTNG_BIN="../src/tchuntng"
 
@@ -38,11 +37,18 @@ function testfile ()
 	esac
 
 	if [ $status -eq $expects_status ]; then
-		echo " -> [OK]"
+		echo " -> [PASSES]"
 	else
-		echo " -> [FAIL]"
+		echo " -> [FAILS]"
 	fi
 
 	return $?
 }
+
+if [ $# -lt 2 ]; then
+	echo "Usage: $0 <memo> <expect-status-code>"
+	exit 1
+fi
+
+testfile "$1" "$2" ${@:3}
 

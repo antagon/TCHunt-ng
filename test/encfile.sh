@@ -1,3 +1,5 @@
+source execprog.sh
+
 function encfile_bcrypt ()
 {
 	ifile="$1"
@@ -33,4 +35,13 @@ function encfile ()
 
 	echo -e " [OK]"
 }
+
+if [ $# -lt 2 ]; then
+	echo "Usage: $0 <memo> <type>"
+	exit 1
+fi
+
+encfile "$1" "$2" ${@:3}
+
+exit $?
 

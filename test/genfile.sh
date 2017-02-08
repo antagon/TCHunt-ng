@@ -1,3 +1,5 @@
+source execprog.sh
+
 # Generate a plain text file.
 function genfile_plaintext ()
 {
@@ -15,13 +17,13 @@ function genfile_random ()
 	name="$1"
 	size="$2"
 
-	execprog dd if=/dev/urandom of="$name" bs=1 count="$size"
+	execprog dd if=/dev/urandom of="$name" bs=1 count="$size" 2>/dev/null
 
 	return $?
 }
 
-# Generate TrueCrypt container.
-function genfile_truecrypt ()
+# Generate VeraCrypt container.
+function genfile_veracrypt ()
 {
 	name="$1"
 	size="$2"
@@ -61,5 +63,17 @@ function genfile ()
 	fi
 
 	echo -e " [OK]"
+
+	return 0
 }
+
+if [ $# -lt 2 ]; then
+	echo "Usage: $0 <memo> <type>"
+	exit 1
+fi
+
+genfile "$1" "$2" ${@:3}
+
+exit $?
+
 
