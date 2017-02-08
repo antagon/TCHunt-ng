@@ -17,13 +17,17 @@ function encfile_openssl ()
 	cipher="$3"
 	armor="$4"
 
-	openssl "$cipher" $(test $armor && echo "-a") -salt -pass "pass:password123" -in "$ifile" -out "$ofile"
+	execprog openssl "$cipher" $(test $armor && echo "-a") -salt -pass "pass:password123" -in "$ifile" -out "$ofile"
 	return $?
 }
 
 function encfile_ccrypt ()
 {
-	return 1
+	ifile="$1"
+	ofile="$2"
+
+	execprog cat "$ifile" | execprog ccrypt --encrypt --quiet --brave --key "password123" > "$ofile"
+	return $?
 }
 
 function encfile ()
