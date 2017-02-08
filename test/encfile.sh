@@ -7,11 +7,18 @@ function encfile_bcrypt ()
 	nocompress="$3"
 
 	echo -ne "password123\npassword123\n" | execprog bcrypt -r -o $(test $nocompress && echo "-c") -s 4 "$ifile" > "$ofile"
+	return $?
 }
 
 function encfile_openssl ()
 {
-	return 1
+	ifile="$1"
+	ofile="$2"
+	cipher="$3"
+	armor="$4"
+
+	openssl "$cipher" $(test $armor && echo "-a") -salt -pass "pass:password123" -in "$ifile" -out "$ofile"
+	return $?
 }
 
 function encfile_ccrypt ()
