@@ -8,5 +8,6 @@ function execprog ()
 	fi
 
 	"$p" ${@:2}
+	return $?
 }
 

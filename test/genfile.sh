@@ -29,6 +29,8 @@ function genfile_veracrypt ()
 	size="$2"
 
 	execprog veracrypt --create --filesystem "none" --size $size"M"	--volume-type "normal" --encryption "AES" --hash "SHA-512" --password "password123" --random-source "/dev/urandom" --keyfiles="" --pim 1 "$name" >/dev/null
+
+	return $?
 }
 
 # Generate LUKS encrypted file.
@@ -61,11 +63,10 @@ function genfile ()
 
 	if [ $? -ne 0 ]; then
 		echo -e " [FAIL]"
-		exit 1
+		return 1
 	fi
 
 	echo -e " [OK]"
-
 	return 0
 }
 

@@ -41,10 +41,11 @@ function encfile ()
 
 	if [ $? -ne 0 ]; then
 		echo -e " [FAIL]"
-		exit 1
+		return 1
 	fi
 
 	echo -e " [OK]"
+	return 0
 }
 
 if [ $# -lt 2 ]; then
