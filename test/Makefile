@@ -15,7 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-RUN=bash
+export TCHUNTNG_BIN=../src/tchuntng
+export TEST_PEDANTIC=no
+
+RUN=/bin/bash
 SAMPLES_DIR=./samples
 
 #
@@ -50,7 +53,7 @@ DELETEME_FILES=$(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)\
 				$(VCCONTAINER_FILE) $(AESENCARMOR_FILE) $(AESENCRAW_FILE)\
 				$(CCRYPT_FILE)
 
-.PHONY: all test generate clean $(addprefix test_, $(TESTME_FILES))
+.PHONY: all generate test test_init clean $(addprefix test_, $(TESTME_FILES))
 
 all: generate test
 
@@ -83,7 +86,11 @@ $(CCRYPT_FILE):
 #
 # File testers
 #
-test: $(addprefix test_, $(TESTME_FILES))
+test: test_init $(addprefix test_, $(TESTME_FILES))
+
+test_init:
+	@echo "Using `$(TCHUNTNG_BIN) -v` ($(TCHUNTNG_BIN))"
+	@echo "Pedantic mode: $(TEST_PEDANTIC)"
 
 test_$(LUKS_FILE):
 	@$(RUN) testfile.sh "Testing '$(LUKS_FILE)' ... " 0 -p "$(LUKS_FILE)"
