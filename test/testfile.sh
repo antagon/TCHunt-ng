@@ -1,16 +1,10 @@
 source execprog.sh
 
-TCHUNTNG_BIN="../src/tchuntng"
-
-function testfile_version ()
-{
-	"$TCHUNTNG_BIN" -v
-}
-
 function testfile ()
 {
 	memo="$1"
 	expects_status="$2"
+	pedantic="$TEST_PEDANTIC"
 
 	echo -ne "$memo"
 
@@ -42,7 +36,11 @@ function testfile ()
 		echo " -> [FAILS]"
 	fi
 
-	return $?
+	if [ -z "$pedantic" ] || [ "$pedantic" == "no" ] || [ "$pedantic" == "NO" ]; then
+		status=0
+	fi
+
+	return $status
 }
 
 if [ $# -lt 2 ]; then
@@ -51,4 +49,6 @@ if [ $# -lt 2 ]; then
 fi
 
 testfile "$1" "$2" ${@:3}
+
+exit $?
 
