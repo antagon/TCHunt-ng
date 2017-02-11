@@ -28,7 +28,7 @@
 #include "test_magic.h"
 #include "test_entropy.h"
 
-#define TCHUNTNG_VERSION "1.3"
+#define TCHUNTNG_VERSION "1.3rc2"
 
 enum
 {
@@ -38,21 +38,17 @@ enum
 
 static struct args
 {
-	int recursive;
 	int quiet;
 	int noatime;
-	int onefs;
 	int showclass;
 	int compatmode;
 } arg;
 
-static int sig_int = 0;
 static int exitno = EXIT_SUCCESS;
 
 static void
 interrupt (int signo)
 {
-	sig_int = signo;
 	exitno = EXIT_SIGNAL;
 	signal (signo, SIG_DFL);
 }
@@ -62,11 +58,9 @@ usage (const char *p)
 {
 	fprintf (stdout, "Usage: %s [options] <file>...\n\n\
 Options:\n\
- -r  recursively traverse a directory\n\
  -s  show a file's classification\n\
  -T  enable TCHunt compatibility mode\n\
  -q  quietly treat no results as success\n\
- -x  don't cross filesystem boundaries\n\
  -p  preserve access time of files analyzed\n\
  -v  show version information\n", p);
 }
@@ -94,12 +88,8 @@ main (int argc, char *argv[])
 	signal (SIGTERM, interrupt);
 	signal (SIGINT, interrupt);
 
-	while ( (c = getopt (argc, argv, "rsTqxpv")) != -1 ){
+	while ( (c = getopt (argc, argv, "sTqpv")) != -1 ){
 		switch ( c ){
-			case 'r':
-				arg.recursive = 1;
-				break;
-
 			case 's':
 				arg.showclass = 1;
 				break;
@@ -110,10 +100,6 @@ main (int argc, char *argv[])
 
 			case 'q':
 				arg.quiet = 1;
-				break;
-
-			case 'x':
-				arg.onefs = 1;
 				break;
 
 			case 'p':
@@ -150,10 +136,7 @@ main (int argc, char *argv[])
 	}
 
 	// Setup the flags for fts_open
-	c = FTS_COMFOLLOW | FTS_LOGICAL | FTS_NOSTAT;
-
-	if ( arg.onefs )
-		c |= FTS_XDEV;
+	c = FTS_COMFOLLOW | FTS_LOGICAL | FTS_NOSTAT | FTS_NOCHDIR;
 
 	fts_p = fts_open (argv + optind, c, NULL);
 
@@ -173,9 +156,9 @@ main (int argc, char *argv[])
 	if ( arg.compatmode )
 		c |= TENTROPY_TEST_FILESIZE;
 
-	while ( ((fts_ent = fts_read (fts_p)) != NULL) && !sig_int ){
-		switch ( fts_ent->fts_info ){
+	while ( exitno == EXIT_SUCCESS && ((fts_ent = fts_read (fts_p)) != NULL) ){
 
+		switch ( fts_ent->fts_info ){
 			/* Regular file */
 			case FTS_F:
 			case FTS_NSOK:
@@ -223,10 +206,16 @@ test_success:
 
 			/* Directory */
 			case FTS_D:
-				if ( ! arg.recursive ){
-					fprintf (stderr, "%s: omitting directory '%s'\n", argv[0], fts_ent->fts_path);
-					fts_set (fts_p, fts_ent, FTS_SKIP);
-				}
+				exitno = EXIT_FAILURE;
+				fprintf (stderr, "%s: '%s': is a directory\n", argv[0], fts_ent->fts_path);
+				break;
+
+			/* Error cases */
+			case FTS_NS:
+			case FTS_DNR:
+			case FTS_ERR:
+				exitno = EXIT_FAILURE;
+				fprintf (stderr, "%s: '%s': %s\n", argv[0], fts_ent->fts_path, strerror (fts_ent->fts_errno));
 				break;
 
 			/* Ignored cases */
@@ -237,25 +226,14 @@ test_success:
 			case FTS_DEFAULT:
 				break;
 
-			/* Error cases */
-			case FTS_NS:
-			case FTS_DNR:
-			case FTS_ERR:
-				fprintf (stderr, "%s: '%s': %s\n", argv[0], fts_ent->fts_path, strerror (fts_ent->fts_errno));
-				break;
-
 			default:
 				fprintf (stderr, "[?] %s\n", fts_ent->fts_path);
 				break;
 		}
 	}
 
-	if ( exitno != EXIT_SIGNAL && !has_file ){
-		if ( arg.quiet )
-			exitno = EXIT_SUCCESS;
-		else
-			exitno = EXIT_NOTFOUND;
-	}
+	if ( !arg.quiet && !has_file && exitno == EXIT_SUCCESS )
+		exitno = EXIT_NOTFOUND;
 
 cleanup:
 	testmagic_free (&testmagic);
