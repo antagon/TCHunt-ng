@@ -95,11 +95,8 @@ testmagic_test (struct testmagic *testmagic, const char *file, const char **cat_
 
 	ftype = magic_file (testmagic->magic_res, file);
 
-	if ( ftype == NULL ){
-		if ( errno == ENODATA || errno == ENOENT || errno == EIO )
-			return 0;
+	if ( ftype == NULL )
 		return -1;
-	}
 
 	match = 0;
 

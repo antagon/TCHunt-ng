@@ -172,11 +172,8 @@ testentropy_x2 (const char *file_path, int flags)
 
 	file = fopen (file_path, "rb");
 
-	if ( file == NULL ){
-		if ( errno == ENODATA || errno == ENOENT || errno == EIO )
-			return 0;
+	if ( file == NULL )
 		return -1;
-	}
 
 	errflag = 0;
 	buff_len = fread (buff, 1, sizeof (buff), file);
