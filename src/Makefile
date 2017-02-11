@@ -11,20 +11,14 @@ install:
 	install --mode 755 $(TARGET) $(INSTALL_DIR)
 
 uninstall:
-	rm -f $(INSTALL_DIR)/$(TARGET)
+	$(RM) $(INSTALL_DIR)/$(TARGET)
 
 clean:
-	rm -f *.o $(TARGET)
+	$(RM) *.o $(TARGET)
 
 $(TARGET): main.o test_magic.o test_entropy.o
 	$(CC) $(CFLAGS) $^ -o $(TARGET) -lmagic -lm
 
-main.o: main.c
-	$(CC) $(CFLAGS) -c $<
-
-test_magic.o: test_magic.c
-	$(CC) $(CFLAGS) -c $<
-
-test_entropy.o: test_entropy.c
-	$(CC) $(CFLAGS) -c $<
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
