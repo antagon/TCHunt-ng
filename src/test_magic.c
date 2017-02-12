@@ -56,7 +56,8 @@ static struct testmagic_filetype
 	{ "mcrypt", TMAGIC_CAT_ENCDATA },
 	{ "GNOME keyring", TMAGIC_CAT_PASS },
 	{ "Mac OS X Keychain File", TMAGIC_CAT_PASS },
-	{ "Vim encrypted file data", TMAGIC_CAT_ENCDATA }
+	{ "Vim encrypted file data", TMAGIC_CAT_ENCDATA },
+	{ "Encore", TMAGIC_CAT_DATA }
 };
 
 int
