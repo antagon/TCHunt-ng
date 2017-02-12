@@ -20,6 +20,7 @@ export TEST_PEDANTIC=no
 
 RUN=/bin/bash
 SAMPLES_DIR=./samples
+TCHUNTNG_FLAGS=-p
 
 #
 # Sample files
@@ -93,48 +94,48 @@ test_init:
 	@echo "Pedantic mode: $(TEST_PEDANTIC)"
 
 test_$(LUKS_FILE):
-	@$(RUN) testfile.sh "Testing '$(LUKS_FILE)' ... " 0 -p "$(LUKS_FILE)"
+	@$(RUN) testfile.sh "Testing '$(LUKS_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(LUKS_FILE)"
 
 test_$(PUBKEYARMOR_FILE):
-	@$(RUN) testfile.sh "Testing '$(PUBKEYARMOR_FILE)' ... " 0 -p "$(PUBKEYARMOR_FILE)"
+	@$(RUN) testfile.sh "Testing '$(PUBKEYARMOR_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(PUBKEYARMOR_FILE)"
 
 test_$(PUBKEYRAW_FILE):
-	@$(RUN) testfile.sh "Testing '$(PUBKEYRAW_FILE)' ... " 0 -p "$(PUBKEYRAW_FILE)"
+	@$(RUN) testfile.sh "Testing '$(PUBKEYRAW_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(PUBKEYRAW_FILE)"
 
 test_$(SECKEYARMOR_FILE):
-	@$(RUN) testfile.sh "Testing '$(SECKEYARMOR_FILE)' ... " 0 -p "$(SECKEYARMOR_FILE)"
+	@$(RUN) testfile.sh "Testing '$(SECKEYARMOR_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(SECKEYARMOR_FILE)"
 
 test_$(SECKEYRAW_FILE):
-	@$(RUN) testfile.sh "Testing '$(SECKEYRAW_FILE)' ... " 0 -p "$(SECKEYRAW_FILE)"
+	@$(RUN) testfile.sh "Testing '$(SECKEYRAW_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(SECKEYRAW_FILE)"
 
 test_$(PLAINTEXT_FILE):
-	@$(RUN) testfile.sh "Testing '$(PLAINTEXT_FILE)' ... " 2 -p "$(PLAINTEXT_FILE)"
+	@$(RUN) testfile.sh "Testing '$(PLAINTEXT_FILE)' ..." 2 $(TCHUNTNG_FLAGS) "$(PLAINTEXT_FILE)"
 
 test_$(GPGMSGARMOR_FILE):
-	@$(RUN) testfile.sh "Testing '$(GPGMSGARMOR_FILE)' ... " 0 -p "$(GPGMSGARMOR_FILE)"
+	@$(RUN) testfile.sh "Testing '$(GPGMSGARMOR_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(GPGMSGARMOR_FILE)"
 
 test_$(GPGMSGRAW_FILE):
-	@$(RUN) testfile.sh "Testing '$(GPGMSGRAW_FILE)' ... " 0 -p "$(GPGMSGRAW_FILE)"
+	@$(RUN) testfile.sh "Testing '$(GPGMSGRAW_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(GPGMSGRAW_FILE)"
 
 test_$(BCRYPT_FILE):
-	@$(RUN) testfile.sh "Testing '$(BCRYPT_FILE)' ... " 0 -p "$(BCRYPT_FILE)"
+	@$(RUN) testfile.sh "Testing '$(BCRYPT_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(BCRYPT_FILE)"
 
 test_$(BCRYPTNCOMPR_FILE):
-	@$(RUN) testfile.sh "Testing '$(BCRYPTNCOMPR_FILE)' ... " 0 -p "$(BCRYPTNCOMPR_FILE)"
+	@$(RUN) testfile.sh "Testing '$(BCRYPTNCOMPR_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(BCRYPTNCOMPR_FILE)"
 
 test_$(VCCONTAINER_FILE):
-	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' ... " 0 -p "$(VCCONTAINER_FILE)"
-	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' (TCHunt compatibility mode) ... " 0 -pT "$(VCCONTAINER_FILE)"
+	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(VCCONTAINER_FILE)"
+	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' (TCHunt compatibility mode) ..." 0 $(TCHUNTNG_FLAGS) -T "$(VCCONTAINER_FILE)"
 
 test_$(AESENCARMOR_FILE):
-	@$(RUN) testfile.sh "Testing '$(AESENCARMOR_FILE)' ... " 0 -p "$(AESENCARMOR_FILE)"
+	@$(RUN) testfile.sh "Testing '$(AESENCARMOR_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(AESENCARMOR_FILE)"
 
 test_$(AESENCRAW_FILE):
-	@$(RUN) testfile.sh "Testing '$(AESENCRAW_FILE)' ... " 0 -p "$(AESENCRAW_FILE)"
+	@$(RUN) testfile.sh "Testing '$(AESENCRAW_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(AESENCRAW_FILE)"
 
 test_$(CCRYPT_FILE):
-	@$(RUN) testfile.sh "Testing '$(CCRYPT_FILE)' ... " 0 -p "$(CCRYPT_FILE)"
+	@$(RUN) testfile.sh "Testing '$(CCRYPT_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(CCRYPT_FILE)"
 
 clean:
-	@rm -f $(DELETEME_FILES)
+	@$(RM) -f $(DELETEME_FILES)
 
