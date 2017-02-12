@@ -62,7 +62,8 @@ Options:\n\
  -T  enable TCHunt compatibility mode\n\
  -q  quietly treat no results as success\n\
  -p  preserve access time of files analyzed\n\
- -v  show version information\n", p);
+ -v  show version information\n\
+ -h  show usage information\n", p);
 }
 
 static void
@@ -88,7 +89,7 @@ main (int argc, char *argv[])
 	signal (SIGTERM, interrupt);
 	signal (SIGINT, interrupt);
 
-	while ( (c = getopt (argc, argv, "sTqpv")) != -1 ){
+	while ( (c = getopt (argc, argv, "sTqpvh")) != -1 ){
 		switch ( c ){
 			case 's':
 				arg.showclass = 1;
@@ -111,6 +112,11 @@ main (int argc, char *argv[])
 				exitno = EXIT_SUCCESS;
 				return exitno;
 
+			case 'h':
+				usage (argv[0]);
+				exitno = EXIT_SUCCESS;
+				return exitno;
+
 			case '?':
 				exitno = EXIT_FAILURE;
 				return exitno;
@@ -118,9 +124,9 @@ main (int argc, char *argv[])
 	}
 
 	if ( (argc - optind) == 0 ){
-		usage (argv[0]);
+		fprintf (stderr, "%s: no input file. Try '%s -h' for more information.\n", argv[0], argv[0]);
 		exitno = EXIT_FAILURE;
-		goto cleanup;
+		return exitno;
 	}
 
 	// Setup the flags for testmagic_init
