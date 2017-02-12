@@ -56,7 +56,7 @@ interrupt (int signo)
 static void
 usage (const char *p)
 {
-	fprintf (stdout, "Usage: %s [options] <file>...\n\n\
+	fprintf (stdout, "Usage: %s [options] <file> [file ...]\n\n\
 Options:\n\
  -s  show a file's classification\n\
  -T  enable TCHunt compatibility mode\n\
@@ -124,7 +124,7 @@ main (int argc, char *argv[])
 	}
 
 	if ( (argc - optind) == 0 ){
-		fprintf (stderr, "%s: no input file. Try '%s -h' for more information.\n", argv[0], argv[0]);
+		usage (argv[0]);
 		exitno = EXIT_FAILURE;
 		return exitno;
 	}
