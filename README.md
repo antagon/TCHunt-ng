@@ -19,12 +19,10 @@ TCHunt-ng performs following tests against content of a file to determine if it 
 	Options:
 	 -p  preserve access time of files analyzed
 	 -q  quietly treat no results as success
-	 -r  recursively traverse a directory
 	 -s  show a file's classification
 	 -T  enable TCHunt compatibility mode
-	 -x  don't cross filesystem boundaries
-	 -z  look inside compressed files
 	 -v  show version information
+	 -h  show usage information
 
 ## Environment
 
@@ -38,7 +36,7 @@ TCHunt-ng exits with one of the following exit codes:
 
 * `0` - content of a file is *likely* to be encrypted.
 * `1` - a generic error occured.
-* `2` - content of a file is not encrypted / no encrypted files were found.
+* `2` - content of a file is not encrypted.
 * `3` - interrupted by a signal.
 
 ## Dependencies
