@@ -32,7 +32,7 @@
 
 enum
 {
-	EXIT_NOTFOUND = 2,
+	EXIT_NOTCRYPT = 2,
 	EXIT_SIGNAL = 3
 };
 
@@ -79,7 +79,7 @@ main (int argc, char *argv[])
 	FTSENT *fts_ent;
 	struct testmagic testmagic;
 	const char *cat;
-	int test_res, has_file, c;
+	int test_res, c;
 
 	fts_p = NULL;
 
@@ -152,8 +152,6 @@ main (int argc, char *argv[])
 		goto cleanup;
 	}
 
-	has_file = 0;
-
 	// Setup the flags for testentropy_x2
 	c = 0;
 
@@ -162,7 +160,7 @@ main (int argc, char *argv[])
 	if ( arg.compatmode )
 		c |= TENTROPY_TEST_FILESIZE;
 
-	while ( exitno == EXIT_SUCCESS && ((fts_ent = fts_read (fts_p)) != NULL) ){
+	while ( exitno != EXIT_SIGNAL && ((fts_ent = fts_read (fts_p)) != NULL) ){
 
 		switch ( fts_ent->fts_info ){
 			/* Regular file */
@@ -175,7 +173,7 @@ main (int argc, char *argv[])
 					exitno = EXIT_FAILURE;
 					goto cleanup;
 				} else if ( test_res == 0 ){
-					/* Skip to next file */
+					exitno = EXIT_NOTCRYPT;
 					continue;
 				} else if ( test_res == TMAGIC_CLASS_DATA ){
 					/* It's data, follow up with other tests... */
@@ -194,16 +192,13 @@ main (int argc, char *argv[])
 					exitno = EXIT_FAILURE;
 					goto cleanup;
 				} else if ( test_res == 0 ){
-					/* Skip to next file */
+					exitno = EXIT_NOTCRYPT;
 					continue;
 				} else {
 					/* It's a match... */
 				}
 
 test_success:
-				/* Print the filename out */
-				has_file = 1;
-
 				if ( arg.showclass )
 					fprintf (stdout, "%s [%s]\n", fts_ent->fts_path, cat);
 				else
@@ -212,17 +207,17 @@ test_success:
 
 			/* Directory */
 			case FTS_D:
-				exitno = EXIT_FAILURE;
 				fprintf (stderr, "%s: '%s': is a directory\n", argv[0], fts_ent->fts_path);
-				break;
+				exitno = EXIT_FAILURE;
+				goto cleanup;
 
 			/* Error cases */
 			case FTS_NS:
 			case FTS_DNR:
 			case FTS_ERR:
-				exitno = EXIT_FAILURE;
 				fprintf (stderr, "%s: '%s': %s\n", argv[0], fts_ent->fts_path, strerror (fts_ent->fts_errno));
-				break;
+				exitno = EXIT_FAILURE;
+				goto cleanup;
 
 			/* Ignored cases */
 			case FTS_DP:
@@ -237,9 +232,6 @@ test_success:
 				break;
 		}
 	}
-
-	if ( !arg.quiet && !has_file && exitno == EXIT_SUCCESS )
-		exitno = EXIT_NOTFOUND;
 
 cleanup:
 	testmagic_free (&testmagic);
