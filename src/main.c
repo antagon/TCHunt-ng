@@ -177,7 +177,7 @@ main (int argc, char *argv[])
 				} else if ( test_res == 0 ){
 					/* Skip to next file */
 					continue;
-				} else if ( test_res == TMAGIC_CAT_DATA ){
+				} else if ( test_res == TMAGIC_CLASS_DATA ){
 					/* It's data, follow up with other tests... */
 				} else {
 					/* It's a class recognized by TCHunt-ng, it's a match!
