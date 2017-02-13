@@ -5,6 +5,20 @@ version 1.3 - 2017-02-??
 Chiasmus key, mcrypt encrypted data, GNOME keyring, Mac OS X Keychain File,
 Vim encrypted file data.
 
+* Deprecate option '-r' and '-x'. Passing a directory on a command line is not
+supported anymore. Recursive scanning is a difficult problem to tackle,
+requiring additional options on par of the program to allow its users to tune
+all the small details. Some of the options are out of the scope of the
+program. Instead of doing a half-assed job, we encourage you to use find(1) in
+tandem.
+
+* Do not ignore IO errors.
+
+* Change the way exit codes are used. If an error occurs for any given file,
+exit immediately with status 1. If any input file specified on a command line
+is not detected as random/encrypted, exit with status 2 after processing the
+rest of the files. Exit status 1 always takes precedence over status 2.
+
 version 1.2 - 2017-01-14
 ------------------------
 
