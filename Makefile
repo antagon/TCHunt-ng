@@ -14,5 +14,5 @@ clean:
 	$(MAKE) -C test/ $@
 
 test:
-	$(MAKE) -C test/ $@
+	$(MAKE) -C test/
 
