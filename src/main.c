@@ -25,10 +25,9 @@
 #include <magic.h>
 #include <unistd.h>
 
-#include "test_magic.h"
-#include "test_entropy.h"
+#include "test.h"
 
-#define TCHUNTNG_VERSION "1.3rc2"
+#define TCHUNTNG_VERSION "1.3rc3"
 
 enum
 {
@@ -60,7 +59,7 @@ usage (const char *p)
 Options:\n\
  -s  show a file's classification\n\
  -T  enable TCHunt compatibility mode\n\
- -q  quietly treat no results as success\n\
+ -q  quietly treat no result as success\n\
  -p  preserve access time of files analyzed\n\
  -v  show version information\n\
  -h  show usage information\n", p);
@@ -77,14 +76,14 @@ main (int argc, char *argv[])
 {
 	FTS *fts_p;
 	FTSENT *fts_ent;
-	struct testmagic testmagic;
 	const char *cat;
+	struct test_ctl test_ctl;
 	int test_res, c;
 
 	fts_p = NULL;
 
 	memset (&arg, 0, sizeof (struct args));
-	memset (&testmagic, 0, sizeof (struct testmagic));
+	memset (&test_ctl, 0, sizeof (struct test_ctl));
 
 	signal (SIGTERM, interrupt);
 	signal (SIGINT, interrupt);
@@ -129,20 +128,23 @@ main (int argc, char *argv[])
 		return exitno;
 	}
 
-	// Setup the flags for testmagic_init
-	c = TESTMAGIC_FLAGS;
+	// Setup test flags
+	c = 0;
 
 	if ( arg.noatime )
-		c |= MAGIC_PRESERVE_ATIME;
+		c |= TESTFLG_RESTOREATIME;
 
-	if ( testmagic_init (&testmagic, c) == -1 ){
-		fprintf (stderr, "%s: %s\n", argv[0], testmagic_error (&testmagic));
+	if ( arg.compatmode )
+		c |= TESTFLG_TESTCOMPAT;
+
+	if ( tests_init (&test_ctl, c) == TESTX_ERROR ){
+		fprintf (stderr, "%s: test initialization failed: %s\n", argv[0], test_ctl.errmsg);
 		exitno = EXIT_FAILURE;
 		goto cleanup;
 	}
 
 	// Setup the flags for fts_open
-	c = FTS_COMFOLLOW | FTS_LOGICAL | FTS_NOSTAT | FTS_NOCHDIR;
+	c = FTS_COMFOLLOW | FTS_LOGICAL | FTS_NOCHDIR;
 
 	fts_p = fts_open (argv + optind, c, NULL);
 
@@ -152,57 +154,31 @@ main (int argc, char *argv[])
 		goto cleanup;
 	}
 
-	// Setup the flags for testentropy_x2
-	c = 0;
-
-	if ( arg.noatime )
-		c |= TENTROPY_PRESERVE_ATIME;
-	if ( arg.compatmode )
-		c |= TENTROPY_TEST_FILESIZE;
-
 	while ( exitno != EXIT_SIGNAL && ((fts_ent = fts_read (fts_p)) != NULL) ){
 
 		switch ( fts_ent->fts_info ){
 			/* Regular file */
 			case FTS_F:
-			case FTS_NSOK:
-				test_res = testmagic_test (&testmagic, fts_ent->fts_path, &cat);
+				test_res = tests_test_file (&test_ctl, fts_ent->fts_path, fts_ent->fts_statp);
 
-				if ( test_res == -1 ){
-					fprintf (stderr, "%s: '%s': %s\n", argv[0], fts_ent->fts_path, testmagic_error (&testmagic));
+				if ( test_res == TESTX_ERROR ){
+					fprintf (stderr, "%s: '%s': %s\n", argv[0], fts_ent->fts_path, test_ctl.errmsg);
 					exitno = EXIT_FAILURE;
 					goto cleanup;
-				} else if ( test_res == 0 ){
-					exitno = EXIT_NOTCRYPT;
+				} else if ( test_res == TESTX_ENORESULT ){
+					exitno = (arg.quiet)? exitno:EXIT_NOTCRYPT;
 					continue;
-				} else if ( test_res == TMAGIC_CLASS_DATA ){
-					/* It's data, follow up with other tests... */
+				} else if ( test_res == TESTX_SUCCESS ){
+					// FIXME
+					cat = "NOT IMPLEMENTED";
+					if ( arg.showclass )
+						fprintf (stdout, "%s [%s]\n", fts_ent->fts_path, cat);
+					else
+						fprintf (stdout, "%s\n", fts_ent->fts_path);
 				} else {
-					/* It's a class recognized by TCHunt-ng, it's a match!
-					 * Unless... we are running in the compatibility mode.
-					 */
-					if ( ! arg.compatmode )
-						goto test_success;
+					fprintf (stderr, "%s: undefined case in %s:%d\n", argv[0], __FILE__, __LINE__);
+					abort ();
 				}
-
-				test_res = testentropy_x2 (fts_ent->fts_path, c);
-
-				if ( test_res == -1 ){
-					fprintf (stderr, "%s: '%s': %s\n", argv[0], fts_ent->fts_path, strerror (errno));
-					exitno = EXIT_FAILURE;
-					goto cleanup;
-				} else if ( test_res == 0 ){
-					exitno = EXIT_NOTCRYPT;
-					continue;
-				} else {
-					/* It's a match... */
-				}
-
-test_success:
-				if ( arg.showclass )
-					fprintf (stdout, "%s [%s]\n", fts_ent->fts_path, cat);
-				else
-					fprintf (stdout, "%s\n", fts_ent->fts_path);
 				break;
 
 			/* Directory */
@@ -223,18 +199,20 @@ test_success:
 			case FTS_DP:
 			case FTS_DC:
 			case FTS_SL:
+			case FTS_NSOK:
 			case FTS_SLNONE:
 			case FTS_DEFAULT:
 				break;
 
 			default:
-				fprintf (stderr, "[?] %s\n", fts_ent->fts_path);
+				fprintf (stderr, "%s: undefined case in %s:%d\n", argv[0], __FILE__, __LINE__);
+				abort ();
 				break;
 		}
 	}
 
 cleanup:
-	testmagic_free (&testmagic);
+	tests_free (&test_ctl);
 
 	if ( fts_p != NULL )
 		fts_close (fts_p);

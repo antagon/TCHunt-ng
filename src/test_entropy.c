@@ -25,30 +25,15 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "testxcode.h"
 #include "test_entropy.h"
 
-/*
- * Minimum value should correspond to the minimum non-zero value in the model
- * and vice-versa.
- */
-#define CHDMODEL_MINLEN 32
-#define CHDMODEL_MAXLEN 16384
-
-/* NOTICE: If you change the value of CHDMODEL_???LEN, change also the values
- * below.  These contants are here so we do not have to calculate log2 of
- * CHDMODEL_???LEN on runtime.
- */
-#define CHDMODEL_MINEXP 5
-#define CHDMODEL_MAXEXP 14
-
-struct chidist_freqmodel
+static struct chidist_freqmodel
 {
 	size_t m_len;
 	double m_min;
 	double m_max;
-};
-
-static struct chidist_freqmodel chidist_model[] = {
+} chidist_model[] = {
 	/* The rationale here is that result of chi-squared test on empty data
 	 * cannot be >0. Empty files will not pass the test.
 	 */
@@ -62,7 +47,7 @@ static struct chidist_freqmodel chidist_model[] = {
 	{ 2048, 140.750000, 402.750000 },
 	{ 4096, 149.000000, 409.250000 },
 	{ 8192, 146.312500, 400.125000 },
-	{ 16384, 154.406250, 403.250000 }
+	{ 16384, 154.156250, 403.250000 }
 };
 
 static inline double
@@ -113,7 +98,7 @@ chidist_freqmodel_lookup_closest (size_t data_len)
 	return &(chidist_model[(size_t) model_idx]);
 }
 
-#define X2_SAMPLE_LEN (CHDMODEL_MAXLEN)
+/* The value corresponds to number of ASCII characters (0 - 255). */
 #define X2_POSSIBILITIES 256
 
 static void
@@ -131,75 +116,20 @@ map_char_counts (const unsigned char *buff, size_t buff_len, size_t array_cnt[X2
 	}
 }
 
-/* Minimal size of a TrueCrypt file. */
-#define TCRYPT_SIZE_MIN 19456
-
 int
-testentropy_x2 (const char *file_path, int flags)
+testentropy_x2_buffer (const unsigned char *buff, size_t len)
 {
-	FILE *file;
-	struct stat fstat;
-	struct utimbuf timebuff;
-	size_t buff_len, char_map[X2_POSSIBILITIES];
-	unsigned char buff[X2_SAMPLE_LEN];
+	size_t char_map[X2_POSSIBILITIES];
 	const struct chidist_freqmodel *model;
 	double expected_freq, chi;
-	int i, errflag;
+	int i, ret;
 
-	if ( (flags & TENTROPY_PRESERVE_ATIME) || (flags & TENTROPY_TEST_FILESIZE) ){
-		if ( stat (file_path, &fstat) == -1 )
-			return -1;
+	ret = TESTX_SUCCESS;
 
-		timebuff.actime = fstat.st_atim.tv_sec;
-		timebuff.modtime = fstat.st_mtim.tv_sec;
-
-		if ( flags & TENTROPY_TEST_FILESIZE ){
-			if ( fstat.st_size < TCRYPT_SIZE_MIN ){
-#if 0
-				fprintf (stderr, "\e[31m%s: %zu <19kiB (TENTROPY_TEST_FILESIZE in effect)\e[0m\n", file_path, fstat.st_size);
-#endif
-				return 0;
-			}
-
-			if ( (fstat.st_size % 512) != 0 ){
-#if 0
-				fprintf (stderr, "\e[31m%s: %zu != mod 512 (TENTROPY_TEST_FILESIZE in effect)\e[0m\n", file_path, fstat.st_size);
-#endif
-				return 0;
-			}
-		}
-	}
-
-	file = fopen (file_path, "rb");
-
-	if ( file == NULL )
-		return -1;
-
-	errflag = 0;
-	buff_len = fread (buff, 1, sizeof (buff), file);
-
-	if ( ferror (file) != 0 )
-		errflag = 1;
-
-	fclose (file);
-
-	/* XXX
-	 * Make sure this condition always precedes the errflag check below!
-	 * This is because fopen(3) modifies atime and we want to make sure it is
-	 * set back to its original value before the function terminates in case of
-	 * fread(3) error.
-	 * XXX
-	 */
-	if ( flags & TENTROPY_PRESERVE_ATIME )
-		utime (file_path, &timebuff);
-
-	if ( errflag )
-		return -1;
-
-	expected_freq = (buff_len * 1.0) / (X2_POSSIBILITIES * 1.0);
+	expected_freq = (len * 1.0) / (X2_POSSIBILITIES * 1.0);
 	chi = 0.0;
 
-	map_char_counts (buff, buff_len, char_map);
+	map_char_counts (buff, len, char_map);
 
 	for ( i = 0; i < X2_POSSIBILITIES; i++ ){
 		if ( char_map[i] == 0 )
@@ -208,26 +138,29 @@ testentropy_x2 (const char *file_path, int flags)
 		chi += pow (((char_map[i] * 1.0) - expected_freq), 2) / expected_freq;
 	}
 
-	model = chidist_freqmodel_lookup_closest (buff_len);
+	model = chidist_freqmodel_lookup_closest (len);
 
 	if ( model == NULL ){
 #if 0
-		fprintf (stderr, "\e[31m%s :: len: %zu, chi: %lf: cannot obtain closest model\e[0m\n", file_path, buff_len, chi);
+		fprintf (stderr, "\e[31m%s :: len: %zu, chi: %lf: cannot obtain closest model\e[0m\n", file_path, len, chi);
 #endif
-		return -1;
+		ret = TESTX_ERROR;
+		goto egress;
 	}
 
 	if ( chi < model->m_min || chi > model->m_max ){
 #if 0
-		fprintf (stderr, "\e[31m%s :: len: %zu, model_len: %zu, chi: %lf\e[0m\n", file_path, buff_len, model->m_len, chi);
+		fprintf (stderr, "\e[31m%s :: len: %zu, model_len: %zu, chi: %lf\e[0m\n", file_path, len, model->m_len, chi);
 #endif
-		return 0;
+		ret = TESTX_ENORESULT;
+		goto egress;
 	}
 
 #if 0
-	fprintf (stderr, "\e[92m%s :: len: %zu, model_len: %zu, chi: %lf\e[0m\n", file_path, buff_len, model->m_len, chi);
+	fprintf (stderr, "\e[92m%s :: len: %zu, model_len: %zu, chi: %lf\e[0m\n", file_path, len, model->m_len, chi);
 #endif
 
-	return 1;
+egress:
+	return ret;
 }
 

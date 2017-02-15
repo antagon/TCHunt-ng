@@ -26,10 +26,9 @@
 					| MAGIC_NO_CHECK_APPTYPE | MAGIC_NO_CHECK_ENCODING | MAGIC_RAW)
 
 enum {
-	TMAGIC_CLASS_DATA		= 1,
-	TMAGIC_CLASS_ENCDATA	= 2,
-	TMAGIC_CLASS_KEY		= 3,
-	TMAGIC_CLASS_PASS		= 4,
+	TMAGIC_CLASS_DATA = 1,
+	TMAGIC_CLASS_KEY = 2,
+	TMAGIC_CLASS_PASS = 3,
 	_TMAGIC_CLASS_EOF
 };
 
@@ -40,7 +39,7 @@ struct testmagic
 
 extern int testmagic_init (struct testmagic *testmagic, int flags);
 
-extern int testmagic_test (struct testmagic *testmagic, const char *file, const char **cat_type);
+extern int testmagic_test_buffer (struct testmagic *testmagic, const unsigned char *buff, size_t len, const char **cat_type);
 
 extern void testmagic_free (struct testmagic *testmagic);
 

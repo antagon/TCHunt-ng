@@ -1,4 +1,4 @@
-CFLAGS = -std=gnu99 -O2 -pedantic -Wall -ggdb
+CFLAGS = -O3 -std=gnu99 -pedantic -Wall -ggdb
 
 TARGET = tchuntng
 INSTALL_DIR = /usr/local/bin
@@ -16,7 +16,7 @@ uninstall:
 clean:
 	$(RM) *.o $(TARGET)
 
-$(TARGET): main.o test_magic.o test_entropy.o
+$(TARGET): main.o test_magic.o test_entropy.o test.o
 	$(CC) $(CFLAGS) $^ -o $(TARGET) -lmagic -lm
 
 %.o: %.c

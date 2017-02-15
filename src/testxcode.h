@@ -15,38 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TEST_ENTROPY_H
-#define _TEST_ENTROPY_H
+#ifndef _TESTXCODE_H
+#define _TESTXCODE_H
 
-enum
-{
-	TENTROPY_PRESERVE_ATIME = 1,
-	TENTROPY_TEST_FILESIZE = 2
-};
-
-/*
- * Minimum value should correspond to the minimum non-zero value in the model
- * and vice-versa.
- */
 enum {
-	CHDMODEL_MINLEN = 32,
-	CHDMODEL_MAXLEN = 16384
+	/* An error occured. */
+	TESTX_ERROR = -1,
+	/* Successful test (a match). */
+	TESTX_SUCCESS = 0,
+	/* No result (no match). */
+	TESTX_ENORESULT = 1,
+	/* Continue with other tests. */
+	TESTX_CONTINUE = 2
 };
-
-/* NOTICE: If you change the value of CHDMODEL_???LEN, change also the values
- * below.  These contants are here so we do not have to calculate log2 of
- * CHDMODEL_???LEN on runtime.
- */
-enum {
-	CHDMODEL_MINEXP = 5,
-	CHDMODEL_MAXEXP = 14
-};
-
-/* Largest chunk of data on which to perform the chi square
- * test. */
-#define TENTROPY_MAXLEN (CHDMODEL_MAXLEN)
-
-extern int testentropy_x2_buffer (const unsigned char *buff, size_t len);
 
 #endif
 

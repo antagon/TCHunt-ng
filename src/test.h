@@ -15,38 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TEST_ENTROPY_H
-#define _TEST_ENTROPY_H
+#ifndef _TEST_H
+#define _TEST_H
 
-enum
+#include "test_magic.h"
+#include "testxcode.h"
+
+enum {
+	/* Restore file's access time */
+	TESTFLG_RESTOREATIME = 1,
+	/* TCHunt compatibility mode */
+	TESTFLG_TESTCOMPAT = 2
+};
+
+struct test_ctl
 {
-	TENTROPY_PRESERVE_ATIME = 1,
-	TENTROPY_TEST_FILESIZE = 2
+	int flags;
+	const char *errmsg;
+	struct testmagic testmagic_res;
 };
 
-/*
- * Minimum value should correspond to the minimum non-zero value in the model
- * and vice-versa.
- */
-enum {
-	CHDMODEL_MINLEN = 32,
-	CHDMODEL_MAXLEN = 16384
-};
+extern int tests_init (struct test_ctl *test_ctl, int flags);
 
-/* NOTICE: If you change the value of CHDMODEL_???LEN, change also the values
- * below.  These contants are here so we do not have to calculate log2 of
- * CHDMODEL_???LEN on runtime.
- */
-enum {
-	CHDMODEL_MINEXP = 5,
-	CHDMODEL_MAXEXP = 14
-};
+extern int tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat);
 
-/* Largest chunk of data on which to perform the chi square
- * test. */
-#define TENTROPY_MAXLEN (CHDMODEL_MAXLEN)
-
-extern int testentropy_x2_buffer (const unsigned char *buff, size_t len);
+extern void tests_free (struct test_ctl *test_ctl);
 
 #endif
 

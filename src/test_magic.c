@@ -23,41 +23,44 @@
 #include <magic.h>
 #include <errno.h>
 
+#include "testxcode.h"
 #include "test_magic.h"
 
 static const char *testmagic_classname[_TMAGIC_CLASS_EOF - 1] = {
-	"data", "data", "keys", "passwords"
+	"data", "keys", "passwords"
 };
 
 static struct testmagic_filetype
 {
 	const char *str_id;
 	int class;
+	int xcode;
 } testmagic_filetypedef[] = {
-	{ "data", TMAGIC_CLASS_DATA },
-	{ "PGP public key block", TMAGIC_CLASS_KEY },
-	{ "PGP message", TMAGIC_CLASS_ENCDATA },
-	{ "PGP\011Secret Key", TMAGIC_CLASS_KEY },
-	{ "GPG symmetrically encrypted data", TMAGIC_CLASS_ENCDATA },
-	{ "GPG encrypted data", TMAGIC_CLASS_ENCDATA },
-	{ "PGP symmetric key encrypted data", TMAGIC_CLASS_ENCDATA },
-	{ "PGP encrypted data", TMAGIC_CLASS_ENCDATA },
-	{ "PGP RSA encrypted session key", TMAGIC_CLASS_ENCDATA },
-	{ "OpenSSH", TMAGIC_CLASS_KEY },
-	{ "PEM RSA private key", TMAGIC_CLASS_KEY },
-	{ "PEM DSA private key", TMAGIC_CLASS_KEY },
-	{ "PEM EC private key", TMAGIC_CLASS_KEY },
-	{ "Keepass password database", TMAGIC_CLASS_PASS },
-	{ "Password Safe V3 database", TMAGIC_CLASS_PASS },
-	{ "cvs password text file", TMAGIC_CLASS_PASS },
-	{ "LUKS encrypted file", TMAGIC_CLASS_ENCDATA },
-	{ "Chiasmus encrypted data", TMAGIC_CLASS_ENCDATA },
-	{ "Chiasmus key", TMAGIC_CLASS_KEY },
-	{ "mcrypt", TMAGIC_CLASS_ENCDATA },
-	{ "GNOME keyring", TMAGIC_CLASS_PASS },
-	{ "Mac OS X Keychain File", TMAGIC_CLASS_PASS },
-	{ "Vim encrypted file data", TMAGIC_CLASS_ENCDATA },
-	{ "Encore", TMAGIC_CLASS_DATA }
+	{ "data", TMAGIC_CLASS_DATA, TESTX_CONTINUE },
+	{ "PGP public key block", TMAGIC_CLASS_KEY, TESTX_SUCCESS },
+	{ "PGP message", TMAGIC_CLASS_DATA, TESTX_SUCCESS },
+	{ "PGP\011Secret Key", TMAGIC_CLASS_KEY, TESTX_SUCCESS },
+	{ "GPG symmetrically encrypted data", TMAGIC_CLASS_DATA, TESTX_SUCCESS },
+	{ "GPG key public ring", TMAGIC_CLASS_KEY, TESTX_SUCCESS },
+	{ "GPG encrypted data", TMAGIC_CLASS_DATA, TESTX_SUCCESS },
+	{ "PGP symmetric key encrypted data", TMAGIC_CLASS_DATA, TESTX_SUCCESS },
+	{ "PGP encrypted data", TMAGIC_CLASS_DATA, TESTX_SUCCESS },
+	{ "PGP RSA encrypted session key", TMAGIC_CLASS_DATA, TESTX_SUCCESS },
+	{ "OpenSSH", TMAGIC_CLASS_KEY, TESTX_SUCCESS },
+	{ "PEM RSA private key", TMAGIC_CLASS_KEY, TESTX_SUCCESS },
+	{ "PEM DSA private key", TMAGIC_CLASS_KEY, TESTX_SUCCESS },
+	{ "PEM EC private key", TMAGIC_CLASS_KEY, TESTX_SUCCESS },
+	{ "Keepass password database", TMAGIC_CLASS_PASS, TESTX_SUCCESS },
+	{ "Password Safe V3 database", TMAGIC_CLASS_PASS, TESTX_SUCCESS },
+	{ "cvs password text file", TMAGIC_CLASS_PASS, TESTX_SUCCESS },
+	{ "LUKS encrypted file", TMAGIC_CLASS_DATA, TESTX_SUCCESS },
+	{ "Chiasmus encrypted data", TMAGIC_CLASS_DATA, TESTX_SUCCESS },
+	{ "Chiasmus key", TMAGIC_CLASS_KEY, TESTX_SUCCESS },
+	{ "mcrypt", TMAGIC_CLASS_DATA, TESTX_SUCCESS },
+	{ "GNOME keyring", TMAGIC_CLASS_PASS, TESTX_SUCCESS },
+	{ "Mac OS X Keychain File", TMAGIC_CLASS_PASS, TESTX_SUCCESS },
+	{ "Vim encrypted file data", TMAGIC_CLASS_DATA, TESTX_SUCCESS },
+	{ "Encore", TMAGIC_CLASS_DATA, TESTX_CONTINUE }
 };
 
 int
@@ -77,7 +80,7 @@ testmagic_init (struct testmagic *testmagic, int flags)
 	 * successfully. */
 	size_t val;
 
-	val = 99;
+	val = 255;
 
 	if ( magic_setparam (testmagic->magic_res, MAGIC_PARAM_NAME_MAX, &val) == -1 )
 		return -1;
@@ -89,33 +92,35 @@ testmagic_init (struct testmagic *testmagic, int flags)
 #define MATCHES(str, predicate) (strncmp ((str), (predicate), strlen ((predicate))) == 0)
 
 int
-testmagic_test (struct testmagic *testmagic, const char *file, const char **cat_type)
+testmagic_test_buffer (struct testmagic *testmagic, const unsigned char *buff, size_t len, const char **cat_type)
 {
 	const char *ftype;
-	int match, i;
+	int i, ret;
 
-	ftype = magic_file (testmagic->magic_res, file);
+	ret = TESTX_ENORESULT;
 
-	if ( ftype == NULL )
-		return -1;
+	ftype = magic_buffer (testmagic->magic_res, buff, len);
 
-	match = 0;
+	if ( ftype == NULL ){
+		ret = TESTX_ERROR;
+		goto egress;
+	}
 
 	for ( i = 0; i < (sizeof (testmagic_filetypedef) / sizeof (testmagic_filetypedef[0])); i++ ){
 		if ( MATCHES (ftype, testmagic_filetypedef[i].str_id) ){
-			match = testmagic_filetypedef[i].class;
+			ret = TESTX_SUCCESS;
+			if ( cat_type != NULL )
+				*cat_type = testmagic_classname[testmagic_filetypedef[i].class - 1];
 			break;
 		}
 	}
-
-	if ( match > 0 && cat_type != NULL )
-		*cat_type = testmagic_classname[match - 1];
 
 #if 0
 	fprintf (stderr, "TESTMAGIC_DBG: %s (%s) --> %d\n", file, ftype, match);
 #endif
 
-	return match;
+egress:
+	return ret;
 }
 
 void
