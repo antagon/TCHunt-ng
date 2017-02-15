@@ -1,6 +1,6 @@
 # TCHunt-ng
 
-TCHunt-ng attempts to reveal encrypted files stored on a filesystem. The program is successful in finding ***TrueCrypt***, ***VeraCrypt***, ***CipherShed*** containers; ***LUKS***, ***EncFS***, ***PGP/GPG*** encrypted files; ***OpenSSH*** and ***PEM*** private keys; password databases; files made up of random data. The code is based on ideas laid out in the project of *Stephen Judge* named *TCHunt*, hence the name. The original code has aged badly, having unnecessary dependencies and unfixed bugs. A rewrite seemed like a good idea.
+TCHunt-ng attempts to reveal encrypted files stored on a filesystem. The program is successful in finding ***TrueCrypt***, ***VeraCrypt***, ***CipherShed*** containers; ***LUKS***, ***EncFS***, ***PGP/GPG*** encrypted files; ***OpenSSH*** and ***PEM*** private keys; password databases; files made up of random data. The code is based on ideas laid out in the project of Stephen Judge named *TCHunt*, hence the name. The original code has aged badly, having unnecessary dependencies and unfixed bugs. A rewrite seemed like a good idea.
 
 TCHunt-ng is a free software licensed under **GPLv3**.
 
@@ -18,7 +18,7 @@ TCHunt-ng performs following tests against content of a file to determine if it 
 
 	Options:
 	 -p  preserve access time of files analyzed
-	 -q  quietly treat no results as success
+	 -q  quietly treat no result as success
 	 -s  show a file's classification
 	 -T  enable TCHunt compatibility mode
 	 -v  show version information
