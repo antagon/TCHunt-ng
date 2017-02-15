@@ -4,11 +4,10 @@ function testfile ()
 {
 	memo="$1"
 	expects_status="$2"
-	pedantic="$TEST_PEDANTIC"
 
 	echo -ne "$memo"
 
-	execprog "$TCHUNTNG_BIN" ${@:3} 1>/dev/null
+	execprog "$TCHUNTNG_BIN" ${@:3} 1>/dev/null 2>/dev/null
 
 	status=$?
 
@@ -36,7 +35,7 @@ function testfile ()
 		echo " -> [FAILS]"
 	fi
 
-	if [ -z "$pedantic" ] || [ "$pedantic" == "no" ] || [ "$pedantic" == "NO" ]; then
+	if [ -z "$TEST_PEDANTIC" ] || [ "$TEST_PEDANTIC" == "no" ] || [ "$TEST_PEDANTIC" == "NO" ]; then
 		status=0
 	fi
 
