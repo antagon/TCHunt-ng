@@ -95,8 +95,6 @@ tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat
 	if ( ret == TESTX_ERROR )
 		goto egress;
 
-	fprintf (stderr, "read %zu\n", buff_len);
-
 	/* If TCHunt compatibility mode is enabled, check the file's size. */
 	if ( test_ctl->flags & TESTFLG_TESTCOMPAT ){
 		if ( fstat->st_size < TCRYPT_SIZE_MIN || (fstat->st_size % 512) != 0 ){
