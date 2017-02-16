@@ -52,7 +52,6 @@ int
 tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat)
 {
 	FILE *file;
-	const struct testmagic_lexrule *test_rule;
 	unsigned char buff[TENTROPY_MAXLEN];
 	struct utimbuf timebuff;
 	size_t buff_len;
@@ -95,7 +94,7 @@ tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat
 	if ( ret == TESTX_ERROR )
 		goto egress;
 
-	ret = testmagic_test_buffer (&(test_ctl->testmagic_res), buff, buff_len, &test_rule);
+	ret = testmagic_test_buffer (&(test_ctl->testmagic_res), buff, buff_len, &(test_ctl->lastlex_rule));
 
 	switch ( ret ){
 		case TESTX_ERROR:
@@ -145,6 +144,18 @@ tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat
 
 egress:
 	return ret;
+}
+
+const char*
+tests_result_classname (struct test_ctl *test_ctl)
+{
+	if ( test_ctl->lastlex_rule == NULL )
+		return NULL;
+
+	snprintf (test_ctl->buff, sizeof (test_ctl->buff),
+				"%s", testmagic_classname[test_ctl->lastlex_rule->class_id]);
+
+	return test_ctl->buff;
 }
 
 void

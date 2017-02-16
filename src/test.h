@@ -32,12 +32,16 @@ struct test_ctl
 {
 	int flags;
 	const char *errmsg;
+	const struct testmagic_lexrule *lastlex_rule;
 	struct testmagic testmagic_res;
+	char buff[32];
 };
 
 extern int tests_init (struct test_ctl *test_ctl, int flags);
 
 extern int tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat);
+
+extern const char* tests_result_classname (struct test_ctl *test_ctl);
 
 extern void tests_free (struct test_ctl *test_ctl);
 
