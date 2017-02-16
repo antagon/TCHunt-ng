@@ -76,7 +76,6 @@ main (int argc, char *argv[])
 {
 	FTS *fts_p;
 	FTSENT *fts_ent;
-	const char *cat;
 	struct test_ctl test_ctl;
 	int test_res, c;
 
@@ -169,10 +168,8 @@ main (int argc, char *argv[])
 					exitno = (arg.quiet)? exitno:EXIT_NOTCRYPT;
 					continue;
 				} else if ( test_res == TESTX_SUCCESS ){
-					// FIXME
-					cat = "NOT IMPLEMENTED";
 					if ( arg.showclass )
-						fprintf (stdout, "%s [%s]\n", fts_ent->fts_path, cat);
+						fprintf (stdout, "%s [%s]\n", fts_ent->fts_path, tests_result_classname (&test_ctl));
 					else
 						fprintf (stdout, "%s\n", fts_ent->fts_path);
 				} else {
