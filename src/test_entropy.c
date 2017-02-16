@@ -28,7 +28,7 @@
 #include "testxcode.h"
 #include "test_entropy.h"
 
-static struct chidist_freqmodel
+static const struct chidist_freqmodel
 {
 	size_t m_len;
 	double m_min;
@@ -82,7 +82,7 @@ derive_cindex (double model_len)
 	return (res - CHDMODEL_MINEXP) + 1;
 }
 
-static struct chidist_freqmodel*
+static const struct chidist_freqmodel*
 chidist_freqmodel_lookup_closest (size_t data_len)
 {
 	double model_len, model_idx;
