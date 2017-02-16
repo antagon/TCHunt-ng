@@ -17,7 +17,12 @@ exit immediately with status 1. If any input file specified on a command line
 is not detected as random/encrypted, exit with status 2 after processing the
 rest of the files. Exit status 1 always takes precedence over status 2.
 
-* Be more strict when it comes to IO errors.
+* Be more strict when dealing with IO errors.
+
+* If option '-s' is in effect, print out a subclass, if known (i.e. [data,
+pgp/gpg]).
+
+* Read input files from the standard input.
 
 version 1.2 - 2017-01-14
 ------------------------

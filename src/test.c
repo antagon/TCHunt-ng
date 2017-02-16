@@ -152,8 +152,14 @@ tests_result_classname (struct test_ctl *test_ctl)
 	if ( test_ctl->lastlex_rule == NULL )
 		return NULL;
 
-	snprintf (test_ctl->buff, sizeof (test_ctl->buff),
-				"%s", testmagic_classname[test_ctl->lastlex_rule->class_id]);
+	if ( test_ctl->lastlex_rule->subclass_id != TMAGIC_SUBCLASS_NONE ){
+		snprintf (test_ctl->buff, sizeof (test_ctl->buff),
+					"%s, %s", testmagic_classname[test_ctl->lastlex_rule->class_id],
+							  testmagic_subclassname[test_ctl->lastlex_rule->subclass_id]);
+	} else {
+		snprintf (test_ctl->buff, sizeof (test_ctl->buff),
+					"%s", testmagic_classname[test_ctl->lastlex_rule->class_id]);
+	}
 
 	return test_ctl->buff;
 }

@@ -33,6 +33,17 @@ enum {
 	_TMAGIC_CLASS_EOF
 };
 
+enum {
+	TMAGIC_SUBCLASS_NONE = 0,
+	TMAGIC_SUBCLASS_PGP = 1,
+	TMAGIC_SUBCLASS_SSH = 2,
+	TMAGIC_SUBCLASS_PEM = 3,
+	TMAGIC_SUBCLASS_LUKS = 4,
+	TMAGIC_SUBCLASS_CHIASMUS = 5,
+	TMAGIC_SUBCLASS_MCRYPT = 6,
+	_TMAGIC_SUBCLASS_EOF
+};
+
 struct testmagic_lexrule
 {
 	const char *str;
@@ -47,6 +58,7 @@ struct testmagic
 };
 
 extern const char *testmagic_classname[_TMAGIC_CLASS_EOF];
+extern const char *testmagic_subclassname[_TMAGIC_SUBCLASS_EOF];
 
 extern int testmagic_init (struct testmagic *testmagic, int flags);
 
