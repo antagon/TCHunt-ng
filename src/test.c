@@ -52,7 +52,7 @@ int
 tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat)
 {
 	FILE *file;
-	const char *file_class;
+	const struct testmagic_lexrule *test_rule;
 	unsigned char buff[TENTROPY_MAXLEN];
 	struct utimbuf timebuff;
 	size_t buff_len;
@@ -95,15 +95,7 @@ tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat
 	if ( ret == TESTX_ERROR )
 		goto egress;
 
-	/* If TCHunt compatibility mode is enabled, check the file's size. */
-	if ( test_ctl->flags & TESTFLG_TESTCOMPAT ){
-		if ( fstat->st_size < TCRYPT_SIZE_MIN || (fstat->st_size % 512) != 0 ){
-			ret = TESTX_ENORESULT;
-			goto egress;
-		}
-	}
-
-	ret = testmagic_test_buffer (&(test_ctl->testmagic_res), buff, buff_len, &file_class);
+	ret = testmagic_test_buffer (&(test_ctl->testmagic_res), buff, buff_len, &test_rule);
 
 	switch ( ret ){
 		case TESTX_ERROR:
@@ -114,11 +106,23 @@ tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat
 			goto egress;
 
 		case TESTX_SUCCESS:
+			// If the compatibility mode is not enabled, jump out from the
+			// switch and perform additional tests.
+			if ( test_ctl->flags & TESTFLG_TESTCOMPAT )
+				break;
 			goto egress;
 
 		case TESTX_CONTINUE:
 			ret = TESTX_SUCCESS;
 			break;
+	}
+
+	/* If TCHunt compatibility mode is enabled, check the file's size. */
+	if ( test_ctl->flags & TESTFLG_TESTCOMPAT ){
+		if ( fstat->st_size < TCRYPT_SIZE_MIN || (fstat->st_size % 512) > 0 ){
+			ret = TESTX_ENORESULT;
+			goto egress;
+		}
 	}
 
 	ret = testentropy_x2_buffer (buff, buff_len);
