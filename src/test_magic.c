@@ -26,12 +26,13 @@
 #include "testxcode.h"
 #include "test_magic.h"
 
-const char *testmagic_classname[_TMAGIC_CLASS_EOF - 1] = {
-	"data", "keys", "passwords"
+const char *testmagic_classname[_TMAGIC_CLASS_EOF] = {
+	"data", "text-data", "keys", "passwords"
 };
 
 static const struct testmagic_lexrule testmagic_lex[] = {
 	{ "data", TMAGIC_CLASS_DATA, 0, TESTX_CONTINUE },
+	{ "ASCII text", TMAGIC_CLASS_ASCII, 0, TESTX_ENORESULT },
 	{ "PGP public key block", TMAGIC_CLASS_KEY, 0, TESTX_SUCCESS },
 	{ "PGP message", TMAGIC_CLASS_DATA, 0, TESTX_SUCCESS },
 	{ "PGP\011Secret Key", TMAGIC_CLASS_KEY, 0, TESTX_SUCCESS },

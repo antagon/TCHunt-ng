@@ -26,10 +26,10 @@
 					| MAGIC_NO_CHECK_APPTYPE | MAGIC_NO_CHECK_ENCODING | MAGIC_RAW)
 
 enum {
-	TMAGIC_CLASS_DATA = 1,
+	TMAGIC_CLASS_DATA = 0,
+	TMAGIC_CLASS_ASCII = 1,
 	TMAGIC_CLASS_KEY = 2,
 	TMAGIC_CLASS_PASS = 3,
-	TMAGIC_CLASS_TEXT = 4,
 	_TMAGIC_CLASS_EOF
 };
 
@@ -46,7 +46,7 @@ struct testmagic
 	magic_t magic_res;
 };
 
-extern const char *textmagic_classname[_TMAGIC_CLASS_EOF - 1];
+extern const char *testmagic_classname[_TMAGIC_CLASS_EOF];
 
 extern int testmagic_init (struct testmagic *testmagic, int flags);
 
