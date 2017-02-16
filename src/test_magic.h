@@ -29,7 +29,16 @@ enum {
 	TMAGIC_CLASS_DATA = 1,
 	TMAGIC_CLASS_KEY = 2,
 	TMAGIC_CLASS_PASS = 3,
+	TMAGIC_CLASS_TEXT = 4,
 	_TMAGIC_CLASS_EOF
+};
+
+struct testmagic_lexrule
+{
+	const char *str;
+	int class_id;
+	int subclass_id;
+	int xcode;
 };
 
 struct testmagic
@@ -37,9 +46,11 @@ struct testmagic
 	magic_t magic_res;
 };
 
+extern const char *textmagic_classname[_TMAGIC_CLASS_EOF - 1];
+
 extern int testmagic_init (struct testmagic *testmagic, int flags);
 
-extern int testmagic_test_buffer (struct testmagic *testmagic, const unsigned char *buff, size_t len, const char **cat_type);
+extern int testmagic_test_buffer (struct testmagic *testmagic, const unsigned char *buff, size_t len, const struct testmagic_lexrule **lexrule);
 
 extern void testmagic_free (struct testmagic *testmagic);
 
