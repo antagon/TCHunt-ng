@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 #include <getopt.h>
 #include <signal.h>
 #include <sys/stat.h>
@@ -27,10 +28,16 @@
 
 #include "test.h"
 
-#define TCHUNTNG_VERSION "1.3rc3"
+#define TCHUNTNG_VERSION "1.3rc4"
 
 enum
 {
+#ifndef EXIT_SUCCESS
+	EXIT_SUCCESS = 0,
+#endif
+#ifndef EXIT_FAILURE
+	EXIT_FAILURE = 1,
+#endif
 	EXIT_NOTCRYPT = 2,
 	EXIT_SIGNAL = 3
 };
@@ -43,12 +50,13 @@ static struct args
 	int compatmode;
 } arg;
 
+static int sigflg = 0;
 static int exitno = EXIT_SUCCESS;
 
 static void
 interrupt (int signo)
 {
-	exitno = EXIT_SIGNAL;
+	sigflg = signo;
 	signal (signo, SIG_DFL);
 }
 
@@ -75,8 +83,10 @@ int
 main (int argc, char *argv[])
 {
 	struct test_ctl test_ctl;
+	char buff[PATH_MAX + 1];
 	struct stat fstat;
-	int test_res, c, i;
+	size_t len;
+	int test_res, c, i, assume_stdin;
 
 	memset (&arg, 0, sizeof (struct args));
 	memset (&test_ctl, 0, sizeof (struct test_ctl));
@@ -124,7 +134,14 @@ main (int argc, char *argv[])
 		return exitno;
 	}
 
-	// Setup test flags
+	/* Check whether the program has been invoked with '-' as the first input
+	 * file. If so, expect data on the standard input. */
+	if ( strcmp ("-", argv[optind]) == 0 )
+		assume_stdin = 1;
+	else
+		assume_stdin = 0;
+
+	/* Setup test flags */
 	c = 0;
 
 	if ( arg.noatime )
@@ -139,59 +156,91 @@ main (int argc, char *argv[])
 		goto cleanup;
 	}
 
-	for ( i = optind; i < argc; i++ ){
-
-		if ( stat (argv[i], &fstat) == -1 ){
-			fprintf (stderr, "%s: '%s': %s\n", argv[0], argv[i], strerror (errno));
-			exitno = EXIT_FAILURE;
-			goto cleanup;
-		}
-
-		switch ( fstat.st_mode & S_IFMT ){
-			/* A regular file */
-			case S_IFREG:
-				test_res = tests_test_file (&test_ctl, argv[i], &fstat);
-
-				if ( test_res == TESTX_ERROR ){
-					fprintf (stderr, "%s: '%s': %s\n", argv[0], argv[i], test_ctl.errmsg);
+	while ( ! sigflg ){
+		/* Expect filenames on the standard input. */
+		if ( assume_stdin ){
+			if ( fgets (buff, PATH_MAX, stdin) == NULL ){
+				if ( ferror (stdin) ){
+					fprintf (stderr, "%s: cannot read data from stdin: %s\n", argv[0], strerror (errno));
 					exitno = EXIT_FAILURE;
 					goto cleanup;
-				} else if ( test_res == TESTX_ENORESULT ){
-					exitno = (arg.quiet)? exitno:EXIT_NOTCRYPT;
-					continue;
-				} else if ( test_res == TESTX_SUCCESS ){
-					if ( arg.showclass )
-						fprintf (stdout, "%s [%s]\n", argv[i], tests_result_classname (&test_ctl));
-					else
-						fprintf (stdout, "%s\n", argv[i]);
-				} else {
-					fprintf (stderr, "%s: err %s:%d\n", argv[0], __FILE__, __LINE__);
-					abort ();
 				}
 				break;
+			}
 
-			/* A directory */
-			case S_IFDIR:
-				fprintf (stderr, "%s: '%s': %s\n", argv[0], argv[i], "is a directory");
+			len = strlen (buff);
+
+			/* Replace the newline character, if there's any. */
+			if ( len > 0 && buff[len - 1] == '\n' )
+				buff[len - 1] = '\0';
+
+			if ( strlen (buff) == 0 )
+				continue;
+
+			argv[optind] = buff;
+		}
+
+		/* Go through the array of filenames. */
+		for ( i = optind; i < argc && !sigflg; i++ ){
+			if ( stat (argv[i], &fstat) == -1 ){
+				fprintf (stderr, "%s: '%s': %s\n", argv[0], argv[i], strerror (errno));
 				exitno = EXIT_FAILURE;
 				goto cleanup;
+			}
 
-			/* Ignored cases */
-			case S_IFSOCK:
-			case S_IFLNK:
-			case S_IFBLK:
-			case S_IFCHR:
-				break;
+			switch ( fstat.st_mode & S_IFMT ){
+				/* A regular file */
+				case S_IFREG:
+					test_res = tests_test_file (&test_ctl, argv[i], &fstat);
 
-			default:
-				fprintf (stderr, "%s: err %s:%d\n", argv[0], __FILE__, __LINE__);
-				abort ();
+					if ( test_res == TESTX_ERROR ){
+						fprintf (stderr, "%s: '%s': %s\n", argv[0], argv[i], test_ctl.errmsg);
+						exitno = EXIT_FAILURE;
+						goto cleanup;
+					} else if ( test_res == TESTX_ENORESULT ){
+						exitno = (arg.quiet)? EXIT_SUCCESS:EXIT_NOTCRYPT;
+						continue;
+					} else if ( test_res == TESTX_SUCCESS ){
+						/* Print out the filename that has been successfully recognized. */
+						if ( arg.showclass )
+							fprintf (stdout, "%s [%s]\n", argv[i], tests_result_classname (&test_ctl));
+						else
+							fprintf (stdout, "%s\n", argv[i]);
+					} else {
+						fprintf (stderr, "%s: err %s:%d\n", argv[0], __FILE__, __LINE__);
+						abort ();
+					}
+					break;
+
+				/* A directory */
+				case S_IFDIR:
+					fprintf (stderr, "%s: '%s': %s\n", argv[0], argv[i], "is a directory");
+					exitno = EXIT_FAILURE;
+					goto cleanup;
+
+				/* Ignored cases */
+				case S_IFSOCK:
+				case S_IFLNK:
+				case S_IFBLK:
+				case S_IFCHR:
+					break;
+
+				default:
+					fprintf (stderr, "%s: err %s:%d\n", argv[0], __FILE__, __LINE__);
+					abort ();
+			}
 		}
+
+		/* At this point we are done processing all the files specified on the
+		 * command line, so jump out of the loop. Unless we are reading files
+		 * from stdin, in that case jump back up. */
+		if ( ! assume_stdin )
+			break;
 	}
 
 cleanup:
 	tests_free (&test_ctl);
 
-	return exitno;
+	return (sigflg)? EXIT_SIGNAL:exitno;
 }
 
