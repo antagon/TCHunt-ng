@@ -6,24 +6,20 @@ Chiasmus key, mcrypt encrypted data, GNOME keyring, Mac OS X Keychain File,
 Vim encrypted file data.
 
 * Get rid of the options '-r' and '-x'. Passing a directory on a command line
-is not supported anymore. Recursive scanning is a difficult problem to tackle,
-requiring additional options on par of the program to allow its users to tune
-all the small details. Some of the options are out of the scope of the
-program. Instead of doing a half-assed job, we encourage you to use find(1) in
-tandem.
+is no longer valid. Recursive scanning is a difficult problem to tackle that
+requires additional options on par of the program. Simply the task is beyond
+the scope of TCHunt-ng. Use find(1) to pass found files to TCHunt-ng.
+
+* Accept file names via stdin. This behavior is enabled by passing '-' as the
+first non-option argument (i.e. ./command [options] -).
 
 * Change the way exit codes are used. If an error occurs for any given file,
 exit immediately with status 1. If any input file specified on a command line
 is not detected as random/encrypted, exit with status 2 after processing the
 rest of the files. Exit status 1 always takes precedence over status 2.
 
-* Accept file names via stdin. This behavior is enabled by passing '-' as the
-first non-option argument (i.e. ./command [options] -).
-
-* If option '-s' is in effect, print out a subclass, if known (i.e. [data,
-pgp/gpg]).
-
-* Read input files from the standard input.
+* When option '-s' is in effect, attempt to further classify the file (i.e.
+[data, pgp/gpg]).
 
 version 1.2 - 2017-01-14
 ------------------------
