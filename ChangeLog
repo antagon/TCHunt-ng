@@ -17,7 +17,8 @@ exit immediately with status 1. If any input file specified on a command line
 is not detected as random/encrypted, exit with status 2 after processing the
 rest of the files. Exit status 1 always takes precedence over status 2.
 
-* Be more strict when dealing with IO errors.
+* Accept file names via stdin. This behavior is enabled by passing '-' as the
+first non-option argument (i.e. ./command [options] -).
 
 * If option '-s' is in effect, print out a subclass, if known (i.e. [data,
 pgp/gpg]).
