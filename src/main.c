@@ -21,8 +21,8 @@
 #include <errno.h>
 #include <getopt.h>
 #include <signal.h>
-#include <fts.h>
-#include <magic.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include "test.h"
@@ -74,12 +74,9 @@ version_info (void)
 int
 main (int argc, char *argv[])
 {
-	FTS *fts_p;
-	FTSENT *fts_ent;
 	struct test_ctl test_ctl;
-	int test_res, c;
-
-	fts_p = NULL;
+	struct stat fstat;
+	int test_res, c, i;
 
 	memset (&arg, 0, sizeof (struct args));
 	memset (&test_ctl, 0, sizeof (struct test_ctl));
@@ -142,26 +139,21 @@ main (int argc, char *argv[])
 		goto cleanup;
 	}
 
-	// Setup the flags for fts_open
-	c = FTS_COMFOLLOW | FTS_LOGICAL | FTS_NOCHDIR;
+	for ( i = optind; i < argc; i++ ){
 
-	fts_p = fts_open (argv + optind, c, NULL);
+		if ( stat (argv[i], &fstat) == -1 ){
+			fprintf (stderr, "%s: '%s': %s\n", argv[0], argv[i], strerror (errno));
+			exitno = EXIT_FAILURE;
+			goto cleanup;
+		}
 
-	if ( fts_p == NULL ){
-		fprintf (stderr, "%s: %s\n", argv[0], strerror (errno));
-		exitno = EXIT_FAILURE;
-		goto cleanup;
-	}
-
-	while ( exitno != EXIT_SIGNAL && ((fts_ent = fts_read (fts_p)) != NULL) ){
-
-		switch ( fts_ent->fts_info ){
-			/* Regular file */
-			case FTS_F:
-				test_res = tests_test_file (&test_ctl, fts_ent->fts_path, fts_ent->fts_statp);
+		switch ( fstat.st_mode & S_IFMT ){
+			/* A regular file */
+			case S_IFREG:
+				test_res = tests_test_file (&test_ctl, argv[i], &fstat);
 
 				if ( test_res == TESTX_ERROR ){
-					fprintf (stderr, "%s: '%s': %s\n", argv[0], fts_ent->fts_path, test_ctl.errmsg);
+					fprintf (stderr, "%s: '%s': %s\n", argv[0], argv[i], test_ctl.errmsg);
 					exitno = EXIT_FAILURE;
 					goto cleanup;
 				} else if ( test_res == TESTX_ENORESULT ){
@@ -169,50 +161,36 @@ main (int argc, char *argv[])
 					continue;
 				} else if ( test_res == TESTX_SUCCESS ){
 					if ( arg.showclass )
-						fprintf (stdout, "%s [%s]\n", fts_ent->fts_path, tests_result_classname (&test_ctl));
+						fprintf (stdout, "%s [%s]\n", argv[i], tests_result_classname (&test_ctl));
 					else
-						fprintf (stdout, "%s\n", fts_ent->fts_path);
+						fprintf (stdout, "%s\n", argv[i]);
 				} else {
-					fprintf (stderr, "%s: undefined case in %s:%d\n", argv[0], __FILE__, __LINE__);
+					fprintf (stderr, "%s: err %s:%d\n", argv[0], __FILE__, __LINE__);
 					abort ();
 				}
 				break;
 
-			/* Directory */
-			case FTS_D:
-				fprintf (stderr, "%s: '%s': is a directory\n", argv[0], fts_ent->fts_path);
-				exitno = EXIT_FAILURE;
-				goto cleanup;
-
-			/* Error cases */
-			case FTS_NS:
-			case FTS_DNR:
-			case FTS_ERR:
-				fprintf (stderr, "%s: '%s': %s\n", argv[0], fts_ent->fts_path, strerror (fts_ent->fts_errno));
+			/* A directory */
+			case S_IFDIR:
+				fprintf (stderr, "%s: '%s': %s\n", argv[0], argv[i], "is a directory");
 				exitno = EXIT_FAILURE;
 				goto cleanup;
 
 			/* Ignored cases */
-			case FTS_DP:
-			case FTS_DC:
-			case FTS_SL:
-			case FTS_NSOK:
-			case FTS_SLNONE:
-			case FTS_DEFAULT:
+			case S_IFSOCK:
+			case S_IFLNK:
+			case S_IFBLK:
+			case S_IFCHR:
 				break;
 
 			default:
-				fprintf (stderr, "%s: undefined case in %s:%d\n", argv[0], __FILE__, __LINE__);
+				fprintf (stderr, "%s: err %s:%d\n", argv[0], __FILE__, __LINE__);
 				abort ();
-				break;
 		}
 	}
 
 cleanup:
 	tests_free (&test_ctl);
-
-	if ( fts_p != NULL )
-		fts_close (fts_p);
 
 	return exitno;
 }
