@@ -156,6 +156,13 @@ main (int argc, char *argv[])
 		goto cleanup;
 	}
 
+	/* Change stdout buffering mode. */
+	if ( setvbuf (stdout, NULL, _IOLBF, 0) != 0 ){
+		fprintf (stderr, "%s: cannot change buffering mode: %s\n", argv[0], strerror (errno));
+		exitno = EXIT_FAILURE;
+		goto cleanup;
+	}
+
 	while ( ! sigflg ){
 		/* Expect filenames on the standard input. */
 		if ( assume_stdin ){
