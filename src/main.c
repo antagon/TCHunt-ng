@@ -230,7 +230,9 @@ main (int argc, char *argv[])
 				case S_IFLNK:
 				case S_IFBLK:
 				case S_IFCHR:
-					break;
+					fprintf (stderr, "%s: '%s': %s\n", argv[0], argv[i], "not a regular file");
+					exitno = EXIT_FAILURE;
+					goto cleanup;
 
 				default:
 					fprintf (stderr, "%s: err %s:%d\n", argv[0], __FILE__, __LINE__);
