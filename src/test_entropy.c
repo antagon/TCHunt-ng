@@ -22,8 +22,6 @@
 #include <utime.h>
 #include <errno.h>
 #include <math.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
 #include "testxcode.h"
 #include "test_entropy.h"
