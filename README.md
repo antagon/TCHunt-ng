@@ -24,6 +24,20 @@ TCHunt-ng performs following tests against content of a file to determine if it 
 	 -v  show version information
 	 -h  show usage information
 
+### Examples
+
+Test a single file:
+
+	$ tchuntng ./test/samples/message.txt.asc
+
+Test multiple files located in the same directory:
+
+	$ tchuntng ./*.*
+
+Traverse a directory tree testing all the files:
+
+	$ find ./ -type f | tchuntng -
+
 ## Environment
 
 The behavior of TCHunt-ng is affected by the following environment variables.
