@@ -28,7 +28,7 @@
 
 #include "test.h"
 
-#define TCHUNTNG_VERSION "1.3rc4"
+#define TCHUNTNG_VERSION "1.3"
 
 enum
 {
