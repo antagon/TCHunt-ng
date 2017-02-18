@@ -42,6 +42,9 @@ CCRYPT_FILE=$(PLAINTEXT_FILE).cpt
 ENCFS_FILES=$(SAMPLES_DIR)/karabina_encfs
 NEXIST_FILE=$(SAMPLES_DIR)/idonotexist.txt
 
+DEPENDENCY_LIST=$(TCHUNTNG_BIN) bcrypt openssl ccrypt dd veracrypt\
+				fallocate cryptsetup
+
 GENERATEME_FILES=$(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)\
 					$(VCCONTAINER_FILE) $(AESENCARMOR_FILE) $(AESENCRAW_FILE)\
 					$(CCRYPT_FILE)
@@ -56,9 +59,16 @@ DELETEME_FILES=$(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)\
 				$(VCCONTAINER_FILE) $(AESENCARMOR_FILE) $(AESENCRAW_FILE)\
 				$(CCRYPT_FILE)
 
-.PHONY: all generate test test_init clean $(addprefix test_, $(TESTME_FILES))
+.PHONY: all prereq $(DEPENDENCY_LIST) generate test test_init $(addprefix test_, $(TESTME_FILES)) clean
 
-all: generate test
+all: prereq generate test
+
+#
+# Check prerequisites
+#
+prereq: $(DEPENDENCY_LIST)
+	@echo "Checking the dependency list ... '$(DEPENDENCY_LIST)'"
+	@which --skip-alias $^ 1>/dev/null
 
 #
 # File generators
