@@ -67,8 +67,7 @@ all: prereq generate test
 # Check prerequisites
 #
 prereq: $(DEPENDENCY_LIST)
-	@echo "Checking the dependency list ... '$(DEPENDENCY_LIST)'"
-	@which --skip-alias $^ 1>/dev/null
+	@$(RUN) checkdep.sh "Checking the dependency list ..." $(DEPENDENCY_LIST)
 
 #
 # File generators
