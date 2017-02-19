@@ -24,7 +24,7 @@ function testfile ()
 
 	echo -ne "$memo"
 
-	execprog "$TCHUNTNG_BIN" ${@:3} 1>/dev/null 2>/dev/null
+	execprog "$TCHUNTNG_BIN" $TCHUNTNG_FLAGS ${@:3} 1>/dev/null 2>/dev/null
 
 	status=$?
 
