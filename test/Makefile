@@ -51,7 +51,7 @@ MCRYPT_BARE_BLOWFISH_GZ_FILE=$(PLAINTEXT_FILE).gz.blowfish.bare.mcrypt
 MCRYPT_BLOWFISH_GZ_FILE=$(PLAINTEXT_FILE).gz.blowfish.mcrypt
 
 
-DEPENDS_ON=$(TCHUNTNG_BIN) bcrypt openssl ccrypt dd veracrypt\
+DEPENDS_ON=$(TCHUNTNG_BIN) bcrypt openssl ccrypt mcrypt dd veracrypt\
 				fallocate cryptsetup
 
 GENERATEME_FILES=$(LUKS_FILE) $(BCRYPT_GZ_FILE) $(BCRYPT_FILE)\
