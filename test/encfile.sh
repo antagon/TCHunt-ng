@@ -47,6 +47,18 @@ function encfile_ccrypt ()
 	return $?
 }
 
+function encfile_mcrypt ()
+{
+	ifile="$1"
+	ofile="$2"
+	cipher="$3"
+	mode="$4"
+#	keysize="$5"
+	bare="$5"
+
+	execprog cat "$ifile" | execprog mcrypt --key "password123" --no-openpgp --algorithm "$cipher" --mode "$mode" --gzip $(test $bare && echo "--bare") > "$ofile"
+}
+
 function encfile ()
 {
 	memo="$1"
