@@ -16,11 +16,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 export TCHUNTNG_BIN=../src/tchuntng
+export TCHUNTNG_FLAGS=-p
 export TEST_PEDANTIC=no
 
 RUN=/bin/bash
 SAMPLES_DIR=./samples
-TCHUNTNG_FLAGS=-p
 
 #
 # Sample files
@@ -116,60 +116,60 @@ test_init:
 	@echo "Pedantic mode: $(TEST_PEDANTIC)"
 
 test_$(LUKS_FILE):
-	@$(RUN) testfile.sh "Testing '$(LUKS_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(LUKS_FILE)"
+	@$(RUN) testfile.sh "Testing '$(LUKS_FILE)' ..." 0 "$(LUKS_FILE)"
 
 test_$(PUBKEYARMOR_FILE):
-	@$(RUN) testfile.sh "Testing '$(PUBKEYARMOR_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(PUBKEYARMOR_FILE)"
+	@$(RUN) testfile.sh "Testing '$(PUBKEYARMOR_FILE)' ..." 0 "$(PUBKEYARMOR_FILE)"
 
 test_$(PUBKEYRAW_FILE):
-	@$(RUN) testfile.sh "Testing '$(PUBKEYRAW_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(PUBKEYRAW_FILE)"
+	@$(RUN) testfile.sh "Testing '$(PUBKEYRAW_FILE)' ..." 0 "$(PUBKEYRAW_FILE)"
 
 test_$(SECKEYARMOR_FILE):
-	@$(RUN) testfile.sh "Testing '$(SECKEYARMOR_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(SECKEYARMOR_FILE)"
+	@$(RUN) testfile.sh "Testing '$(SECKEYARMOR_FILE)' ..." 0 "$(SECKEYARMOR_FILE)"
 
 test_$(SECKEYRAW_FILE):
-	@$(RUN) testfile.sh "Testing '$(SECKEYRAW_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(SECKEYRAW_FILE)"
+	@$(RUN) testfile.sh "Testing '$(SECKEYRAW_FILE)' ..." 0 "$(SECKEYRAW_FILE)"
 
 test_$(PLAINTEXT_FILE):
-	@$(RUN) testfile.sh "Testing '$(PLAINTEXT_FILE)' ..." 2 $(TCHUNTNG_FLAGS) "$(PLAINTEXT_FILE)"
-	@$(RUN) testfile.sh "Testing '$(PLAINTEXT_FILE)' (treat no result as success) ..." 0 $(TCHUNTNG_FLAGS) -q "$(PLAINTEXT_FILE)"
+	@$(RUN) testfile.sh "Testing '$(PLAINTEXT_FILE)' ..." 2 "$(PLAINTEXT_FILE)"
+	@$(RUN) testfile.sh "Testing '$(PLAINTEXT_FILE)' (treat no result as success) ..." 0 -q "$(PLAINTEXT_FILE)"
 
 test_$(GPGMSGARMOR_FILE):
-	@$(RUN) testfile.sh "Testing '$(GPGMSGARMOR_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(GPGMSGARMOR_FILE)"
+	@$(RUN) testfile.sh "Testing '$(GPGMSGARMOR_FILE)' ..." 0 "$(GPGMSGARMOR_FILE)"
 
 test_$(GPGMSGRAW_FILE):
-	@$(RUN) testfile.sh "Testing '$(GPGMSGRAW_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(GPGMSGRAW_FILE)"
+	@$(RUN) testfile.sh "Testing '$(GPGMSGRAW_FILE)' ..." 0 "$(GPGMSGRAW_FILE)"
 
 test_$(BCRYPT_FILE):
-	@$(RUN) testfile.sh "Testing '$(BCRYPT_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(BCRYPT_FILE)"
+	@$(RUN) testfile.sh "Testing '$(BCRYPT_FILE)' ..." 0 "$(BCRYPT_FILE)"
 
 test_$(BCRYPTNCOMPR_FILE):
-	@$(RUN) testfile.sh "Testing '$(BCRYPTNCOMPR_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(BCRYPTNCOMPR_FILE)"
+	@$(RUN) testfile.sh "Testing '$(BCRYPTNCOMPR_FILE)' ..." 0 "$(BCRYPTNCOMPR_FILE)"
 
 test_$(VCCONTAINER_FILE):
-	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(VCCONTAINER_FILE)"
-	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' (TCHunt compatibility mode) ..." 0 $(TCHUNTNG_FLAGS) -T "$(VCCONTAINER_FILE)"
+	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' ..." 0 "$(VCCONTAINER_FILE)"
+	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' (TCHunt compatibility mode) ..." 0 -T "$(VCCONTAINER_FILE)"
 
 test_$(AESENCARMOR_FILE):
-	@$(RUN) testfile.sh "Testing '$(AESENCARMOR_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(AESENCARMOR_FILE)"
+	@$(RUN) testfile.sh "Testing '$(AESENCARMOR_FILE)' ..." 0 "$(AESENCARMOR_FILE)"
 
 test_$(AESENCRAW_FILE):
-	@$(RUN) testfile.sh "Testing '$(AESENCRAW_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(AESENCRAW_FILE)"
+	@$(RUN) testfile.sh "Testing '$(AESENCRAW_FILE)' ..." 0 "$(AESENCRAW_FILE)"
 
 test_$(CCRYPT_FILE):
-	@$(RUN) testfile.sh "Testing '$(CCRYPT_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(CCRYPT_FILE)"
+	@$(RUN) testfile.sh "Testing '$(CCRYPT_FILE)' ..." 0 "$(CCRYPT_FILE)"
 
 test_$(ENCFS_FILES):
-	@$(RUN) testfile.sh "Testing '$(ENCFS_FILES)' ..." 0 $(TCHUNTNG_FLAGS) $(ENCFS_FILES)/*
+	@$(RUN) testfile.sh "Testing '$(ENCFS_FILES)' ..." 0 $(ENCFS_FILES)/*
 
 test_$(NEXIST_FILE):
-	@$(RUN) testfile.sh "Testing '$(NEXIST_FILE)' ..." 1 $(TCHUNTNG_FLAGS) "$(NEXIST_FILE)"
+	@$(RUN) testfile.sh "Testing '$(NEXIST_FILE)' ..." 1 "$(NEXIST_FILE)"
 
 test_$(MCRYPT_BARE_AES256_GZ_FILE):
-	@$(RUN) testfile.sh "Testing '$(MCRYPT_BARE_AES256_GZ_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(MCRYPT_BARE_AES256_GZ_FILE)"
+	@$(RUN) testfile.sh "Testing '$(MCRYPT_BARE_AES256_GZ_FILE)' ..." 0 "$(MCRYPT_BARE_AES256_GZ_FILE)"
 
 test_$(MCRYPT_AES256_GZ_FILE):
-	@$(RUN) testfile.sh "Testing '$(MCRYPT_AES256_GZ_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(MCRYPT_AES256_GZ_FILE)"
+	@$(RUN) testfile.sh "Testing '$(MCRYPT_AES256_GZ_FILE)' ..." 0 "$(MCRYPT_AES256_GZ_FILE)"
 
 clean:
 	@$(RM) -f $(DELETEME_FILES)
