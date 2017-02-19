@@ -45,7 +45,7 @@ function genfile_veracrypt ()
 	name="$1"
 	size="$2"
 
-	execprog veracrypt --create --filesystem "none" --size $size"M"	--volume-type "normal" --encryption "AES" --hash "SHA-512" --password "password123" --random-source "/dev/urandom" --keyfiles="" --pim 1 "$name" >/dev/null
+	execprog veracrypt --text --create --filesystem "none" --size $size"M"	--volume-type "normal" --encryption "AES" --hash "SHA-512" --password "password123" --random-source "/dev/urandom" --keyfiles="" --pim 1 "$name" >/dev/null
 
 	return $?
 }
