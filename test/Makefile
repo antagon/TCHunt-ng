@@ -36,38 +36,43 @@ LUKS_FILE=$(SAMPLES_DIR)/luks_container.dat
 BCRYPT_FILE=$(PLAINTEXT_FILE).bfe
 BCRYPTNCOMPR_FILE=$(PLAINTEXT_FILE)-nocompr.bfe
 VCCONTAINER_FILE=$(SAMPLES_DIR)/vera_container.hc
-AESENCARMOR_FILE=$(SAMPLES_DIR)/message.txt.aes-armored.enc
-AESENCRAW_FILE=$(SAMPLES_DIR)/message.txt.aes.enc
-CCRYPT_FILE=$(PLAINTEXT_FILE).cpt
+AESENCARMOR_FILE=$(SAMPLES_DIR)/message.txt.aes256.armored.openssl
+AESENCRAW_FILE=$(SAMPLES_DIR)/message.txt.aes256.openssl
+CCRYPT_FILE=$(PLAINTEXT_FILE).ccrypt
 ENCFS_FILES=$(SAMPLES_DIR)/karabina_encfs
 NEXIST_FILE=$(SAMPLES_DIR)/idonotexist.txt
+MCRYPT_BARE_AES256_GZ_FILE=$(PLAINTEXT_FILE).gz.aes256.bare.mcrypt
+MCRYPT_AES256_GZ_FILE=$(PLAINTEXT_FILE).gz.aes256.mcrypt
 
-DEPENDENCY_LIST=$(TCHUNTNG_BIN) bcrypt openssl ccrypt dd veracrypt\
+
+DEPENDS_ON=$(TCHUNTNG_BIN) bcrypt openssl ccrypt dd veracrypt\
 				fallocate cryptsetup
 
 GENERATEME_FILES=$(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)\
 					$(VCCONTAINER_FILE) $(AESENCARMOR_FILE) $(AESENCRAW_FILE)\
-					$(CCRYPT_FILE)
+					$(CCRYPT_FILE) $(MCRYPT_BARE_AES256_GZ_FILE)\
+					$(MCRYPT_AES256_GZ_FILE)
 
 TESTME_FILES=$(PUBKEYARMOR_FILE) $(PUBKEYRAW_FILE) $(SECKEYARMOR_FILE)\
 				$(SECKEYRAW_FILE) $(PLAINTEXT_FILE) $(GPGMSGARMOR_FILE)\
 				$(GPGMSGRAW_FILE) $(LUKS_FILE) $(BCRYPT_FILE)\
 				$(BCRYPTNCOMPR_FILE) $(VCCONTAINER_FILE) $(AESENCARMOR_FILE)\
-				$(AESENCRAW_FILE) $(CCRYPT_FILE) $(ENCFS_FILES) $(NEXIST_FILE)
+				$(AESENCRAW_FILE) $(CCRYPT_FILE) $(ENCFS_FILES) $(NEXIST_FILE)\
+				$(CCRYPT_FILE) $(MCRYPT_BARE_AES256_GZ_FILE) $(MCRYPT_AES256_GZ_FILE)
 
 DELETEME_FILES=$(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)\
 				$(VCCONTAINER_FILE) $(AESENCARMOR_FILE) $(AESENCRAW_FILE)\
-				$(CCRYPT_FILE)
+				$(CCRYPT_FILE) $(MCRYPT_BARE_AES256_GZ_FILE) $(MCRYPT_AES256_GZ_FILE)
 
-.PHONY: all prereq $(DEPENDENCY_LIST) generate test test_init $(addprefix test_, $(TESTME_FILES)) clean
+.PHONY: all clean deps prereq $(DEPENDS_ON) generate test test_init $(addprefix test_, $(TESTME_FILES))
 
 all: prereq generate test
 
 #
 # Check prerequisites
 #
-prereq: $(DEPENDENCY_LIST)
-	@$(RUN) checkdep.sh "Checking the dependency list ..." $(DEPENDENCY_LIST)
+prereq: $(DEPENDS_ON)
+	@$(RUN) checkdep.sh "Checking the dependency list ..." $(DEPENDS_ON)
 
 #
 # File generators
@@ -94,6 +99,12 @@ $(AESENCRAW_FILE):
 
 $(CCRYPT_FILE):
 	@$(RUN) encfile.sh "Generating '$@' ..." "ccrypt" "$(PLAINTEXT_FILE)" "$@"
+
+$(MCRYPT_BARE_AES256_GZ_FILE):
+	@$(RUN) encfile.sh "Generating '$@' ..." "mcrypt" "$(PLAINTEXT_FILE)" "$@" "rijndael-256" "cbc" true 2>/dev/null
+
+$(MCRYPT_AES256_GZ_FILE):
+	@$(RUN) encfile.sh "Generating '$@' ..." "mcrypt" "$(PLAINTEXT_FILE)" "$@" "rijndael-256" "cbc" 2>/dev/null
 
 #
 # File testers
@@ -154,6 +165,15 @@ test_$(ENCFS_FILES):
 test_$(NEXIST_FILE):
 	@$(RUN) testfile.sh "Testing '$(NEXIST_FILE)' ..." 1 $(TCHUNTNG_FLAGS) "$(NEXIST_FILE)"
 
+test_$(MCRYPT_BARE_AES256_GZ_FILE):
+	@$(RUN) testfile.sh "Testing '$(MCRYPT_BARE_AES256_GZ_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(MCRYPT_BARE_AES256_GZ_FILE)"
+
+test_$(MCRYPT_AES256_GZ_FILE):
+	@$(RUN) testfile.sh "Testing '$(MCRYPT_AES256_GZ_FILE)' ..." 0 $(TCHUNTNG_FLAGS) "$(MCRYPT_AES256_GZ_FILE)"
+
 clean:
 	@$(RM) -f $(DELETEME_FILES)
+
+deps:
+	@which $(DEPENDS_ON)
 
