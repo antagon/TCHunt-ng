@@ -53,11 +53,11 @@ end
 local chunks = {
 	{ len = 32, stats = { min = 196.000000, max = 706.750000, init = true }},
 	{ len = 64, stats = { min = 144.000000, max = 500.250000, init = true }},
-	{ len = 128, stats = { min = 85.000000, max = 389.249832, init = true }},
+	{ len = 128, stats = { min = 85.000000, max = 396.500000, init = true }},
 	{ len = 256, stats = { min = 76.000000, max = 343.000000, init = true }},
 	{ len = 512, stats = { min = 104.000000, max = 330.000000, init = true }},
 	{ len = 1024, stats = { min = 130.500000, max = 393.000000, init = true }},
-	{ len = 2048, stats = { min = 140.750000, max = 402.750000, init = true }},
+	{ len = 2048, stats = { min = 140.750000, max = 403.750000, init = true }},
 	{ len = 4096, stats = { min = 149.000000, max = 409.250000, init = true }},
 	{ len = 8192, stats = { min = 146.312500, max = 400.125000, init = true }},
 	{ len = 16384, stats = { min = 154.156250, max = 403.250000, init = true }}
