@@ -23,7 +23,7 @@ function checkdep ()
 
 	echo -ne "$memo"
 
-	execprog which --skip-alias ${@:2} 1>/dev/null
+	execprog which ${@:2} 1>/dev/null
 
 	if [ $? -ne 0 ]; then
 		echo -e " [FAIL]"
