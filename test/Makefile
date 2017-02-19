@@ -43,26 +43,40 @@ CCRYPT_FILE=$(PLAINTEXT_FILE).ccrypt
 ENCFS_FILES=$(SAMPLES_DIR)/karabina_encfs
 MCRYPT_BARE_AES256_GZ_FILE=$(PLAINTEXT_FILE).gz.aes256.bare.mcrypt
 MCRYPT_AES256_GZ_FILE=$(PLAINTEXT_FILE).gz.aes256.mcrypt
+MCRYPT_BARE_TWOFISH_GZ_FILE=$(PLAINTEXT_FILE).gz.twofish.bare.mcrypt
+MCRYPT_TWOFISH_GZ_FILE=$(PLAINTEXT_FILE).gz.twofish.mcrypt
+MCRYPT_BARE_ARCFOUR_GZ_FILE=$(PLAINTEXT_FILE).gz.arcfour.bare.mcrypt
+MCRYPT_ARCFOUR_GZ_FILE=$(PLAINTEXT_FILE).gz.arcfour.mcrypt
+MCRYPT_BARE_BLOWFISH_GZ_FILE=$(PLAINTEXT_FILE).gz.blowfish.bare.mcrypt
+MCRYPT_BLOWFISH_GZ_FILE=$(PLAINTEXT_FILE).gz.blowfish.mcrypt
 
 
 DEPENDS_ON=$(TCHUNTNG_BIN) bcrypt openssl ccrypt dd veracrypt\
 				fallocate cryptsetup
 
 GENERATEME_FILES=$(LUKS_FILE) $(BCRYPT_GZ_FILE) $(BCRYPT_FILE)\
-					$(VCCONTAINER_FILE) $(OPENSSL_ARMORED_AES256_FILE) $(OPENSSL_AES256_FILE)\
-					$(CCRYPT_FILE) $(MCRYPT_BARE_AES256_GZ_FILE)\
-					$(MCRYPT_AES256_GZ_FILE)
+					$(VCCONTAINER_FILE) $(OPENSSL_ARMORED_AES256_FILE)\
+					$(OPENSSL_AES256_FILE) $(CCRYPT_FILE) $(MCRYPT_BARE_AES256_GZ_FILE)\
+					$(MCRYPT_AES256_GZ_FILE) $(MCRYPT_BARE_TWOFISH_GZ_FILE)\
+					$(MCRYPT_TWOFISH_GZ_FILE) $(MCRYPT_BARE_ARCFOUR_GZ_FILE)\
+					$(MCRYPT_ARCFOUR_GZ_FILE) $(MCRYPT_BARE_BLOWFISH_GZ_FILE)\
+					$(MCRYPT_BLOWFISH_GZ_FILE)
 
 TESTME_FILES=$(PUBKEYARMOR_FILE) $(PUBKEYRAW_FILE) $(SECKEYARMOR_FILE)\
 				$(SECKEYRAW_FILE) $(PLAINTEXT_FILE) $(GPGMSGARMOR_FILE)\
 				$(GPGMSGRAW_FILE) $(LUKS_FILE) $(BCRYPT_GZ_FILE)\
 				$(BCRYPT_FILE) $(VCCONTAINER_FILE) $(OPENSSL_ARMORED_AES256_FILE)\
 				$(OPENSSL_AES256_FILE) $(CCRYPT_FILE) $(ENCFS_FILES) $(NEXIST_FILE)\
-				$(CCRYPT_FILE) $(MCRYPT_BARE_AES256_GZ_FILE) $(MCRYPT_AES256_GZ_FILE)
+				$(CCRYPT_FILE) $(MCRYPT_BARE_AES256_GZ_FILE) $(MCRYPT_AES256_GZ_FILE)\
+				$(MCRYPT_BARE_TWOFISH_GZ_FILE) $(MCRYPT_TWOFISH_GZ_FILE)\
+				$(MCRYPT_BARE_ARCFOUR_GZ_FILE) $(MCRYPT_ARCFOUR_GZ_FILE)\
+				$(MCRYPT_BARE_BLOWFISH_GZ_FILE) $(MCRYPT_BLOWFISH_GZ_FILE)
 
 DELETEME_FILES=$(LUKS_FILE) $(BCRYPT_GZ_FILE) $(BCRYPT_FILE)\
 				$(VCCONTAINER_FILE) $(OPENSSL_ARMORED_AES256_FILE) $(OPENSSL_AES256_FILE)\
-				$(CCRYPT_FILE) $(MCRYPT_BARE_AES256_GZ_FILE) $(MCRYPT_AES256_GZ_FILE)
+				$(CCRYPT_FILE) $(MCRYPT_BARE_AES256_GZ_FILE) $(MCRYPT_AES256_GZ_FILE)\
+				$(MCRYPT_BARE_TWOFISH_GZ_FILE) $(MCRYPT_TWOFISH_GZ_FILE) $(MCRYPT_BARE_ARCFOUR_GZ_FILE)\
+				$(MCRYPT_ARCFOUR_GZ_FILE) $(MCRYPT_BARE_BLOWFISH_GZ_FILE) $(MCRYPT_BLOWFISH_GZ_FILE)
 
 .PHONY: all clean deps prereq $(DEPENDS_ON) generate test test_init $(addprefix test_, $(TESTME_FILES))
 
@@ -106,6 +120,24 @@ $(MCRYPT_BARE_AES256_GZ_FILE):
 $(MCRYPT_AES256_GZ_FILE):
 	@$(RUN) encfile.sh "Generating '$@' ..." "mcrypt" "$(PLAINTEXT_FILE)" "$@" "rijndael-256" "cbc" 2>/dev/null
 
+$(MCRYPT_BARE_TWOFISH_GZ_FILE):
+	@$(RUN) encfile.sh "Generating '$@' ..." "mcrypt" "$(PLAINTEXT_FILE)" "$@" "twofish" "cbc" true 2>/dev/null
+
+$(MCRYPT_TWOFISH_GZ_FILE):
+	@$(RUN) encfile.sh "Generating '$@' ..." "mcrypt" "$(PLAINTEXT_FILE)" "$@" "twofish" "cbc" 2>/dev/null
+
+$(MCRYPT_BARE_ARCFOUR_GZ_FILE):
+	@$(RUN) encfile.sh "Generating '$@' ..." "mcrypt" "$(PLAINTEXT_FILE)" "$@" "arcfour" "cbc" true 2>/dev/null
+
+$(MCRYPT_ARCFOUR_GZ_FILE):
+	@$(RUN) encfile.sh "Generating '$@' ..." "mcrypt" "$(PLAINTEXT_FILE)" "$@" "arcfour" "cbc" 2>/dev/null
+
+$(MCRYPT_BARE_BLOWFISH_GZ_FILE):
+	@$(RUN) encfile.sh "Generating '$@' ..." "mcrypt" "$(PLAINTEXT_FILE)" "$@" "blowfish" "cbc" true 2>/dev/null
+
+$(MCRYPT_BLOWFISH_GZ_FILE):
+	@$(RUN) encfile.sh "Generating '$@' ..." "mcrypt" "$(PLAINTEXT_FILE)" "$@" "blowfish" "cbc" 2>/dev/null
+
 #
 # File testers
 #
@@ -116,60 +148,78 @@ test_init:
 	@echo "Pedantic mode: $(TEST_PEDANTIC)"
 
 test_$(LUKS_FILE):
-	@$(RUN) testfile.sh "Testing '$(LUKS_FILE)' ..." 0 "$(LUKS_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
 
 test_$(PUBKEYARMOR_FILE):
-	@$(RUN) testfile.sh "Testing '$(PUBKEYARMOR_FILE)' ..." 0 "$(PUBKEYARMOR_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
 
 test_$(PUBKEYRAW_FILE):
-	@$(RUN) testfile.sh "Testing '$(PUBKEYRAW_FILE)' ..." 0 "$(PUBKEYRAW_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
 
 test_$(SECKEYARMOR_FILE):
-	@$(RUN) testfile.sh "Testing '$(SECKEYARMOR_FILE)' ..." 0 "$(SECKEYARMOR_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
 
 test_$(SECKEYRAW_FILE):
-	@$(RUN) testfile.sh "Testing '$(SECKEYRAW_FILE)' ..." 0 "$(SECKEYRAW_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
 
 test_$(PLAINTEXT_FILE):
-	@$(RUN) testfile.sh "Testing '$(PLAINTEXT_FILE)' ..." 2 "$(PLAINTEXT_FILE)"
-	@$(RUN) testfile.sh "Testing '$(PLAINTEXT_FILE)' (treat no result as success) ..." 0 -q "$(PLAINTEXT_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 2 "$(subst test_,,$@)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' (treat no result as success) ..." 0 -q "$(subst test_,,$@)"
 
 test_$(GPGMSGARMOR_FILE):
-	@$(RUN) testfile.sh "Testing '$(GPGMSGARMOR_FILE)' ..." 0 "$(GPGMSGARMOR_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
 
 test_$(GPGMSGRAW_FILE):
-	@$(RUN) testfile.sh "Testing '$(GPGMSGRAW_FILE)' ..." 0 "$(GPGMSGRAW_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
 
 test_$(BCRYPT_GZ_FILE):
-	@$(RUN) testfile.sh "Testing '$(BCRYPT_GZ_FILE)' ..." 0 "$(BCRYPT_GZ_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
 
 test_$(BCRYPT_FILE):
-	@$(RUN) testfile.sh "Testing '$(BCRYPT_FILE)' ..." 0 "$(BCRYPT_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
 
 test_$(VCCONTAINER_FILE):
-	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' ..." 0 "$(VCCONTAINER_FILE)"
-	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' (TCHunt compatibility mode) ..." 0 -T "$(VCCONTAINER_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' (TCHunt compatibility mode) ..." 0 -T "$(subst test_,,$@)"
 
 test_$(OPENSSL_ARMORED_AES256_FILE):
-	@$(RUN) testfile.sh "Testing '$(OPENSSL_ARMORED_AES256_FILE)' ..." 0 "$(OPENSSL_ARMORED_AES256_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
 
 test_$(OPENSSL_AES256_FILE):
-	@$(RUN) testfile.sh "Testing '$(OPENSSL_AES256_FILE)' ..." 0 "$(OPENSSL_AES256_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
 
 test_$(CCRYPT_FILE):
-	@$(RUN) testfile.sh "Testing '$(CCRYPT_FILE)' ..." 0 "$(CCRYPT_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
 
 test_$(ENCFS_FILES):
-	@$(RUN) testfile.sh "Testing '$(ENCFS_FILES)' ..." 0 $(ENCFS_FILES)/*
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 $(ENCFS_FILES)/*
 
 test_$(NEXIST_FILE):
-	@$(RUN) testfile.sh "Testing '$(NEXIST_FILE)' ..." 1 "$(NEXIST_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 1 "$(subst test_,,$@)"
 
 test_$(MCRYPT_BARE_AES256_GZ_FILE):
-	@$(RUN) testfile.sh "Testing '$(MCRYPT_BARE_AES256_GZ_FILE)' ..." 0 "$(MCRYPT_BARE_AES256_GZ_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
 
 test_$(MCRYPT_AES256_GZ_FILE):
-	@$(RUN) testfile.sh "Testing '$(MCRYPT_AES256_GZ_FILE)' ..." 0 "$(MCRYPT_AES256_GZ_FILE)"
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
+
+test_$(MCRYPT_BARE_TWOFISH_GZ_FILE):
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
+
+test_$(MCRYPT_TWOFISH_GZ_FILE):
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
+
+test_$(MCRYPT_BARE_ARCFOUR_GZ_FILE):
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
+
+test_$(MCRYPT_ARCFOUR_GZ_FILE):
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
+
+test_$(MCRYPT_BARE_BLOWFISH_GZ_FILE):
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
+
+test_$(MCRYPT_BLOWFISH_GZ_FILE):
+	@$(RUN) testfile.sh "Testing '$(subst test_,,$@)' ..." 0 "$(subst test_,,$@)"
 
 clean:
 	@$(RM) -f $(DELETEME_FILES)
