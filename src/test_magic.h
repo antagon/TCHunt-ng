@@ -62,7 +62,8 @@ extern const char *testmagic_subclassname[_TMAGIC_SUBCLASS_EOF];
 
 extern int testmagic_init (struct testmagic *testmagic, int flags);
 
-extern int testmagic_test_buffer (struct testmagic *testmagic, const unsigned char *buff, size_t len, const struct testmagic_lexrule **lexrule);
+extern int testmagic_test_buffer (struct testmagic *testmagic, const unsigned char *buff,
+									size_t len, const struct testmagic_lexrule **lexrule);
 
 extern void testmagic_free (struct testmagic *testmagic);
 

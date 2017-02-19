@@ -18,6 +18,8 @@
 #ifndef _TEST_H
 #define _TEST_H
 
+#include <sys/stat.h>
+
 #include "test_magic.h"
 #include "testxcode.h"
 
