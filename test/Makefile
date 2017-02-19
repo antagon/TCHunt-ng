@@ -30,17 +30,17 @@ PUBKEYRAW_FILE=$(SAMPLES_DIR)/gpg_pubkey.dat
 SECKEYARMOR_FILE=$(SAMPLES_DIR)/gpg_secretkey.asc
 SECKEYRAW_FILE=$(SAMPLES_DIR)/gpg_secretkey.dat
 PLAINTEXT_FILE=$(SAMPLES_DIR)/message.txt
+NEXIST_FILE=$(SAMPLES_DIR)/idonotexist.txt
 GPGMSGARMOR_FILE=$(SAMPLES_DIR)/message.txt.asc
 GPGMSGRAW_FILE=$(SAMPLES_DIR)/message.txt.gpg
 LUKS_FILE=$(SAMPLES_DIR)/luks_container.dat
-BCRYPT_FILE=$(PLAINTEXT_FILE).bfe
-BCRYPTNCOMPR_FILE=$(PLAINTEXT_FILE)-nocompr.bfe
 VCCONTAINER_FILE=$(SAMPLES_DIR)/vera_container.hc
-AESENCARMOR_FILE=$(SAMPLES_DIR)/message.txt.aes256.armored.openssl
-AESENCRAW_FILE=$(SAMPLES_DIR)/message.txt.aes256.openssl
+BCRYPT_GZ_FILE=$(PLAINTEXT_FILE).gz.bcrypt
+BCRYPT_FILE=$(PLAINTEXT_FILE).bcrypt
+OPENSSL_ARMORED_AES256_FILE=$(SAMPLES_DIR)/message.txt.aes256.armored.openssl
+OPENSSL_AES256_FILE=$(SAMPLES_DIR)/message.txt.aes256.openssl
 CCRYPT_FILE=$(PLAINTEXT_FILE).ccrypt
 ENCFS_FILES=$(SAMPLES_DIR)/karabina_encfs
-NEXIST_FILE=$(SAMPLES_DIR)/idonotexist.txt
 MCRYPT_BARE_AES256_GZ_FILE=$(PLAINTEXT_FILE).gz.aes256.bare.mcrypt
 MCRYPT_AES256_GZ_FILE=$(PLAINTEXT_FILE).gz.aes256.mcrypt
 
@@ -48,20 +48,20 @@ MCRYPT_AES256_GZ_FILE=$(PLAINTEXT_FILE).gz.aes256.mcrypt
 DEPENDS_ON=$(TCHUNTNG_BIN) bcrypt openssl ccrypt dd veracrypt\
 				fallocate cryptsetup
 
-GENERATEME_FILES=$(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)\
-					$(VCCONTAINER_FILE) $(AESENCARMOR_FILE) $(AESENCRAW_FILE)\
+GENERATEME_FILES=$(LUKS_FILE) $(BCRYPT_GZ_FILE) $(BCRYPT_FILE)\
+					$(VCCONTAINER_FILE) $(OPENSSL_ARMORED_AES256_FILE) $(OPENSSL_AES256_FILE)\
 					$(CCRYPT_FILE) $(MCRYPT_BARE_AES256_GZ_FILE)\
 					$(MCRYPT_AES256_GZ_FILE)
 
 TESTME_FILES=$(PUBKEYARMOR_FILE) $(PUBKEYRAW_FILE) $(SECKEYARMOR_FILE)\
 				$(SECKEYRAW_FILE) $(PLAINTEXT_FILE) $(GPGMSGARMOR_FILE)\
-				$(GPGMSGRAW_FILE) $(LUKS_FILE) $(BCRYPT_FILE)\
-				$(BCRYPTNCOMPR_FILE) $(VCCONTAINER_FILE) $(AESENCARMOR_FILE)\
-				$(AESENCRAW_FILE) $(CCRYPT_FILE) $(ENCFS_FILES) $(NEXIST_FILE)\
+				$(GPGMSGRAW_FILE) $(LUKS_FILE) $(BCRYPT_GZ_FILE)\
+				$(BCRYPT_FILE) $(VCCONTAINER_FILE) $(OPENSSL_ARMORED_AES256_FILE)\
+				$(OPENSSL_AES256_FILE) $(CCRYPT_FILE) $(ENCFS_FILES) $(NEXIST_FILE)\
 				$(CCRYPT_FILE) $(MCRYPT_BARE_AES256_GZ_FILE) $(MCRYPT_AES256_GZ_FILE)
 
-DELETEME_FILES=$(LUKS_FILE) $(BCRYPT_FILE) $(BCRYPTNCOMPR_FILE)\
-				$(VCCONTAINER_FILE) $(AESENCARMOR_FILE) $(AESENCRAW_FILE)\
+DELETEME_FILES=$(LUKS_FILE) $(BCRYPT_GZ_FILE) $(BCRYPT_FILE)\
+				$(VCCONTAINER_FILE) $(OPENSSL_ARMORED_AES256_FILE) $(OPENSSL_AES256_FILE)\
 				$(CCRYPT_FILE) $(MCRYPT_BARE_AES256_GZ_FILE) $(MCRYPT_AES256_GZ_FILE)
 
 .PHONY: all clean deps prereq $(DEPENDS_ON) generate test test_init $(addprefix test_, $(TESTME_FILES))
@@ -82,19 +82,19 @@ generate: $(GENERATEME_FILES)
 $(LUKS_FILE):
 	@$(RUN) genfile.sh "Generating '$@' ..." "luks" "$@" "4"
 
-$(BCRYPT_FILE):
+$(BCRYPT_GZ_FILE):
 	@$(RUN) encfile.sh "Generating '$@' ..." "bcrypt" "$(PLAINTEXT_FILE)" "$@" 2>/dev/null
 
-$(BCRYPTNCOMPR_FILE):
+$(BCRYPT_FILE):
 	@$(RUN) encfile.sh "Generating '$@' ..." "bcrypt" "$(PLAINTEXT_FILE)" "$@" true 2>/dev/null
 
 $(VCCONTAINER_FILE):
 	@$(RUN) genfile.sh "Generating '$@' ..." "veracrypt" "$@" "4"
 
-$(AESENCARMOR_FILE):
+$(OPENSSL_ARMORED_AES256_FILE):
 	@$(RUN) encfile.sh "Generating '$@' ..." "openssl" "$(PLAINTEXT_FILE)" "$@" "aes-256-cbc" true
 
-$(AESENCRAW_FILE):
+$(OPENSSL_AES256_FILE):
 	@$(RUN) encfile.sh "Generating '$@' ..." "openssl" "$(PLAINTEXT_FILE)" "$@" "aes-256-cbc"
 
 $(CCRYPT_FILE):
@@ -140,21 +140,21 @@ test_$(GPGMSGARMOR_FILE):
 test_$(GPGMSGRAW_FILE):
 	@$(RUN) testfile.sh "Testing '$(GPGMSGRAW_FILE)' ..." 0 "$(GPGMSGRAW_FILE)"
 
+test_$(BCRYPT_GZ_FILE):
+	@$(RUN) testfile.sh "Testing '$(BCRYPT_GZ_FILE)' ..." 0 "$(BCRYPT_GZ_FILE)"
+
 test_$(BCRYPT_FILE):
 	@$(RUN) testfile.sh "Testing '$(BCRYPT_FILE)' ..." 0 "$(BCRYPT_FILE)"
-
-test_$(BCRYPTNCOMPR_FILE):
-	@$(RUN) testfile.sh "Testing '$(BCRYPTNCOMPR_FILE)' ..." 0 "$(BCRYPTNCOMPR_FILE)"
 
 test_$(VCCONTAINER_FILE):
 	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' ..." 0 "$(VCCONTAINER_FILE)"
 	@$(RUN) testfile.sh "Testing '$(VCCONTAINER_FILE)' (TCHunt compatibility mode) ..." 0 -T "$(VCCONTAINER_FILE)"
 
-test_$(AESENCARMOR_FILE):
-	@$(RUN) testfile.sh "Testing '$(AESENCARMOR_FILE)' ..." 0 "$(AESENCARMOR_FILE)"
+test_$(OPENSSL_ARMORED_AES256_FILE):
+	@$(RUN) testfile.sh "Testing '$(OPENSSL_ARMORED_AES256_FILE)' ..." 0 "$(OPENSSL_ARMORED_AES256_FILE)"
 
-test_$(AESENCRAW_FILE):
-	@$(RUN) testfile.sh "Testing '$(AESENCRAW_FILE)' ..." 0 "$(AESENCRAW_FILE)"
+test_$(OPENSSL_AES256_FILE):
+	@$(RUN) testfile.sh "Testing '$(OPENSSL_AES256_FILE)' ..." 0 "$(OPENSSL_AES256_FILE)"
 
 test_$(CCRYPT_FILE):
 	@$(RUN) testfile.sh "Testing '$(CCRYPT_FILE)' ..." 0 "$(CCRYPT_FILE)"
