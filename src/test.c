@@ -105,10 +105,8 @@ tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat
 			goto egress;
 
 		case TESTX_SUCCESS:
-			// If the compatibility mode is not enabled, jump out from the
-			// switch and perform additional tests.
 			if ( test_ctl->flags & TESTFLG_TESTCOMPAT )
-				break;
+				ret = TESTX_ENORESULT;
 			goto egress;
 
 		case TESTX_CONTINUE:
