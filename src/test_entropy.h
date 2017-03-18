@@ -29,7 +29,7 @@ enum
  * and vice-versa.
  */
 enum {
-	CHDMODEL_MINLEN = 32,
+	CHDMODEL_MINLEN = 256,
 	CHDMODEL_MAXLEN = 16384
 };
 
@@ -38,7 +38,7 @@ enum {
  * CHDMODEL_???LEN on runtime.
  */
 enum {
-	CHDMODEL_MINEXP = 5,
+	CHDMODEL_MINEXP = 8,
 	CHDMODEL_MAXEXP = 14
 };
 

@@ -34,9 +34,13 @@ static const struct chidist_freqmodel
 	 * cannot be >0. Empty files will not pass the test.
 	 */
 	{ 0, 1.0, 1.0 },
+#if 0
+	/* These lengths should be ignored as it is not possible to represent an
+	 * entire (ascii 0 - 255) test alphabet in such a small data. */
 	{ 32, 196.000000, 706.750000 },
 	{ 64, 144.000000, 500.250000 },
 	{ 128, 85.000000, 396.500000 },
+#endif
 	{ 256, 76.000000, 343.000000 },
 	{ 512, 104.000000, 331.000000 },
 	{ 1024, 130.500000, 393.000000 },
@@ -54,7 +58,7 @@ derive_closest (double num)
 	res = pow (2, round (log2 (num)));
 
 	if ( res < CHDMODEL_MINLEN )
-		return 0;
+		return 0.0;
 
 	if ( res > CHDMODEL_MAXLEN )
 		return CHDMODEL_MAXLEN;
@@ -75,7 +79,7 @@ derive_cindex (double model_len)
 	if ( res < CHDMODEL_MINEXP || res > CHDMODEL_MAXEXP )
 		return -1.0;
 
-	return (res - CHDMODEL_MINEXP) + 1;
+	return (res - CHDMODEL_MINEXP) + 1.0;
 }
 
 static const struct chidist_freqmodel*
