@@ -14,8 +14,8 @@ TCHunt-ng performs following tests against content of a file to determine if it 
 
 ## Usage
 
-	Usage: tchuntng [options] <file>...
-
+	Usage: ./tchuntng [options] <file> [file ...]
+	
 	Options:
 	 -p  preserve access time of files analyzed
 	 -q  quietly treat no result as success

@@ -65,10 +65,10 @@ usage (const char *p)
 {
 	fprintf (stdout, "Usage: %s [options] <file> [file ...]\n\n\
 Options:\n\
+ -p  preserve access time of files analyzed\n\
+ -q  quietly treat no result as success\n\
  -s  show a file's classification\n\
  -T  enable TCHunt compatibility mode\n\
- -q  quietly treat no result as success\n\
- -p  preserve access time of files analyzed\n\
  -v  show version information\n\
  -h  show usage information\n", p);
 }
