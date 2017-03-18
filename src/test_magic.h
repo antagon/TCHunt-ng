@@ -20,10 +20,17 @@
 
 #include <magic.h>
 
-#define TESTMAGIC_FLAGS (MAGIC_NO_CHECK_APPTYPE | MAGIC_SYMLINK | MAGIC_NO_CHECK_COMPRESS \
-					| MAGIC_NO_CHECK_ELF | MAGIC_NO_CHECK_FORTRAN | MAGIC_NO_CHECK_TAR \
-					| MAGIC_NO_CHECK_TOKENS | MAGIC_NO_CHECK_TROFF | MAGIC_NO_CHECK_CDF \
-					| MAGIC_NO_CHECK_APPTYPE | MAGIC_NO_CHECK_ENCODING | MAGIC_RAW)
+#define TESTMAGIC_FLAGS (MAGIC_NO_CHECK_APPTYPE \
+						| MAGIC_SYMLINK \
+						| MAGIC_NO_CHECK_COMPRESS \
+						| MAGIC_NO_CHECK_ELF \
+						| MAGIC_NO_CHECK_FORTRAN \
+						| MAGIC_NO_CHECK_TAR \
+						| MAGIC_NO_CHECK_TOKENS \
+						| MAGIC_NO_CHECK_TROFF \
+						| MAGIC_NO_CHECK_CDF \
+						| MAGIC_NO_CHECK_ENCODING \
+						| MAGIC_RAW)
 
 enum {
 	TMAGIC_CLASS_DATA = 0,
@@ -55,6 +62,7 @@ struct testmagic_lexrule
 struct testmagic
 {
 	magic_t magic_res;
+	int flags;
 };
 
 extern const char *testmagic_classname[_TMAGIC_CLASS_EOF];
