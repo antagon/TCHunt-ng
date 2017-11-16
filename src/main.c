@@ -28,7 +28,7 @@
 
 #include "test.h"
 
-#define TCHUNTNG_VERSION "1.3"
+#define TCHUNTNG_VERSION "1.4"
 
 enum
 {
@@ -156,11 +156,13 @@ main (int argc, char *argv[])
 		goto cleanup;
 	}
 
-	/* Change stdout buffering mode. */
-	if ( setvbuf (stdout, NULL, _IOLBF, 0) != 0 ){
-		fprintf (stderr, "%s: cannot change buffering mode: %s\n", argv[0], strerror (errno));
-		exitno = EXIT_FAILURE;
-		goto cleanup;
+	/* Disable stdout buffering if reading files from stdin. */
+	if ( assume_stdin ){
+		if ( setvbuf (stdout, NULL, _IOLBF, 0) != 0 ){
+			fprintf (stderr, "%s: cannot change buffering mode: %s\n", argv[0], strerror (errno));
+			exitno = EXIT_FAILURE;
+			goto cleanup;
+		}
 	}
 
 	while ( ! sigflg ){
