@@ -75,7 +75,7 @@ Compile the source code and install the executable:
 
 ## Limitations
 
-TCHunt-ng has no way to tell apart a genuinely encrypted file and a file made up of random data. Files smaller than 32 bytes, unless recognized by its type, are ignored.
+TCHunt-ng has no way to tell apart a genuinely encrypted file and a file made up of random data. Files smaller than 256 bytes, unless recognized by its type, are ignored.
 
 ## References
 
