@@ -1,5 +1,4 @@
-CFLAGS = -O3 -std=gnu99 -pedantic -Wall -ggdb
-
+CFLAGS = -O3 -std=gnu99 -D_POSIX_C_SOURCE=200809L -pedantic -Wall -ggdb
 TARGET = tchuntng
 INSTALL_DIR = /usr/local/bin
 

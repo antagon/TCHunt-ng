@@ -18,7 +18,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#if _POSIX_C_SOURCE <= 200809L
 #include <utime.h>
+#endif
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -53,15 +56,24 @@ tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat
 {
 	FILE *file;
 	unsigned char buff[TENTROPY_MAXLEN];
+#if _POSIX_C_SOURCE >= 200809L
+	struct timespec times[2];
+#else
 	struct utimbuf timebuff;
+#endif
 	size_t buff_len;
 	int ret;
 
 	ret = TESTX_SUCCESS;
 
 	if ( test_ctl->flags & TESTFLG_RESTOREATIME ){
-		timebuff.actime = fstat->st_atim.tv_sec;
-		timebuff.modtime = fstat->st_mtim.tv_sec;
+#if _POSIX_C_SOURCE >= 200809L
+		times[0] = fstat->st_atim;
+		times[1] = fstat->st_mtim;
+#else
+		timebuff.actime = fstat->st_atime;
+		timebuff.modtime = fstat->st_mtime;
+#endif
 	}
 
 	file = fopen (path, "rb");
@@ -88,8 +100,13 @@ tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat
 	 * fread(3) error.
 	 * XXX
 	 */
-	if ( test_ctl->flags & TESTFLG_RESTOREATIME )
+	if ( test_ctl->flags & TESTFLG_RESTOREATIME ){
+#if _POSIX_C_SOURCE >= 200809L
+		utimensat (AT_FDCWD, path, times, 0);
+#else
 		utime (path, &timebuff);
+#endif
+	}
 
 	if ( ret == TESTX_ERROR )
 		goto egress;
