@@ -56,7 +56,7 @@ tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat
 {
 	FILE *file;
 	unsigned char buff[TENTROPY_MAXLEN];
-#if _POSIX_C_SOURCE >= 200809L
+#if _POSIX_C_SOURCE >= 200809L && !defined(__APPLE__)
 	struct timespec times[2];
 #else
 	struct utimbuf timebuff;
@@ -67,7 +67,7 @@ tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat
 	ret = TESTX_SUCCESS;
 
 	if ( test_ctl->flags & TESTFLG_RESTOREATIME ){
-#if _POSIX_C_SOURCE >= 200809L
+#if _POSIX_C_SOURCE >= 200809L && !defined(__APPLE__)
 		times[0] = fstat->st_atim;
 		times[1] = fstat->st_mtim;
 #else
@@ -101,7 +101,7 @@ tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat
 	 * XXX
 	 */
 	if ( test_ctl->flags & TESTFLG_RESTOREATIME ){
-#if _POSIX_C_SOURCE >= 200809L
+#if _POSIX_C_SOURCE >= 200809L && !defined(__APPLE__)
 		utimensat (AT_FDCWD, path, times, 0);
 #else
 		utime (path, &timebuff);
