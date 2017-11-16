@@ -195,6 +195,43 @@ main (int argc, char *argv[])
 				goto cleanup;
 			}
 
+			/* A regular file */
+			if ( S_ISREG (fstat.st_mode) ){
+				test_res = tests_test_file (&test_ctl, argv[i], &fstat);
+
+				switch (test_res) {
+					case TESTX_ERROR:
+						fprintf (stderr, "%s: '%s': %s\n", argv[0], argv[i], test_ctl.errmsg);
+						exitno = EXIT_FAILURE;
+						goto cleanup;
+
+					case TESTX_ENORESULT:
+						exitno = (arg.quiet)? EXIT_SUCCESS:EXIT_NOTCRYPT;
+						continue;
+
+					case TESTX_SUCCESS:
+						/* Print out the filename that has been successfully recognized. */
+						if ( arg.showclass )
+							fprintf (stdout, "%s [%s]\n", argv[i], tests_result_classname (&test_ctl));
+						else
+							fprintf (stdout, "%s\n", argv[i]);
+						break;
+
+					default:
+						fprintf (stderr, "%s: err %s:%d\n", argv[0], __FILE__, __LINE__);
+						abort ();
+				}
+			/* A directory */
+			} else if ( S_ISDIR (fstat.st_mode) ){
+				fprintf (stderr, "%s: '%s': %s\n", argv[0], argv[i], "is a directory");
+				exitno = EXIT_FAILURE;
+				goto cleanup;
+			} else {
+				fprintf (stderr, "%s: '%s': %s\n", argv[0], argv[i], "not a regular file");
+				exitno = EXIT_FAILURE;
+				goto cleanup;
+			}
+#if 0
 			switch ( fstat.st_mode & S_IFMT ){
 				/* A regular file */
 				case S_IFREG:
@@ -239,6 +276,7 @@ main (int argc, char *argv[])
 					fprintf (stderr, "%s: err %s:%d\n", argv[0], __FILE__, __LINE__);
 					abort ();
 			}
+#endif
 		}
 
 		/* At this point we are done processing all the files specified on the
