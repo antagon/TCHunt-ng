@@ -20,7 +20,7 @@
 #endif
 #include <stdlib.h>
 #include <string.h>
-#include <magic.h>
+#include </usr/local/include/magic.h>
 #include <errno.h>
 
 #include "testxcode.h"

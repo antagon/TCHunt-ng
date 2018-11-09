@@ -15,7 +15,7 @@ TCHunt-ng performs following tests against content of a file to determine if it 
 ## Usage
 
 	Usage: ./tchuntng [options] <file> [file ...]
-	
+
 	Options:
 	 -p  preserve access time of files analyzed
 	 -q  quietly treat no result as success
@@ -72,6 +72,10 @@ On Fedora:
 Compile the source code and install the executable:
 
 	make && sudo make install
+    
+ On OSX 10.14.1
+
+     make && make install
 
 ## Limitations
 
@@ -86,4 +90,3 @@ https://github.com/file/file
 https://en.wikipedia.org/wiki/Chi-squared_test
 
 http://forensicswiki.org/wiki/TrueCrypt#Detection
-

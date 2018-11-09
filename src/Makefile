@@ -8,7 +8,7 @@ INSTALL_DIR = /usr/local/bin
 all: $(TARGET)
 
 install:
-	install --mode 755 $(TARGET) $(INSTALL_DIR)
+	install $(TARGET) $(INSTALL_DIR)
 
 uninstall:
 	$(RM) $(INSTALL_DIR)/$(TARGET)
@@ -21,4 +21,3 @@ $(TARGET): main.o test_magic.o test_entropy.o test.o
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
-

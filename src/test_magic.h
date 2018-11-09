@@ -18,7 +18,7 @@
 #ifndef _TEST_MAGIC_H
 #define _TEST_MAGIC_H
 
-#include <magic.h>
+#include </usr/local/include/magic.h>
 
 #define TESTMAGIC_FLAGS (MAGIC_NO_CHECK_APPTYPE \
 						| MAGIC_SYMLINK \

@@ -60,8 +60,8 @@ tests_test_file (struct test_ctl *test_ctl, const char *path, struct stat *fstat
 	ret = TESTX_SUCCESS;
 
 	if ( test_ctl->flags & TESTFLG_RESTOREATIME ){
-		timebuff.actime = fstat->st_atim.tv_sec;
-		timebuff.modtime = fstat->st_mtim.tv_sec;
+		timebuff.actime = fstat->st_atimespec.tv_sec;
+		timebuff.modtime = fstat->st_mtimespec.tv_sec;
 	}
 
 	file = fopen (path, "rb");
@@ -170,4 +170,3 @@ tests_free (struct test_ctl *test_ctl)
 
 	testmagic_free (&(test_ctl->testmagic_res));
 }
-
